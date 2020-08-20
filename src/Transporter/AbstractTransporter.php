@@ -17,6 +17,16 @@ use Hyperf\Rpc\Contract\TransporterInterface;
 abstract class AbstractTransporter implements TransporterInterface
 {
     /**
+     * @var string
+     */
+    public $host;
+
+    /**
+     * @var int
+     */
+    public $port;
+
+    /**
      * @var null|LoadBalancerInterface
      */
     protected $loadBalancer;

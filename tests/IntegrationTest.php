@@ -13,6 +13,7 @@ namespace HyperfTest\Jet;
 
 use Hyperf\Jet\ClientFactory;
 use Hyperf\Jet\DataFormatter\DataFormatter;
+use Hyperf\Jet\Exception\ServerException;
 use Hyperf\Jet\Packer\JsonEofPacker;
 use Hyperf\Jet\PathGenerator\PathGenerator;
 use Hyperf\Jet\ProtocolManager;
@@ -42,12 +43,11 @@ class IntegrationTest extends TestCase
         $this->assertSame($a + $b, $result);
     }
 
-    /**
-     * @expectedException \Hyperf\Jet\Exception\ServerException
-     * @expectedExceptionMessage Method not found.
-     */
     public function testJsonrpcCallNotExistMethodWithClientFactory()
     {
+        $this->expectException(ServerException::class);
+        $this->expectExceptionMessage('Method not found.');
+
         [$service, $protocol] = $this->registerCalculatorServiceWithJsonrpcProtocol();
         $clientFactory = new ClientFactory();
         $client = $clientFactory->create($service, $protocol);
@@ -63,12 +63,11 @@ class IntegrationTest extends TestCase
         $this->assertSame($a + $b, $result);
     }
 
-    /**
-     * @expectedException \Hyperf\Jet\Exception\ServerException
-     * @expectedExceptionMessage Method not found.
-     */
     public function testJsonrpcCallNotExistMethodWithCustomClient()
     {
+        $this->expectException(ServerException::class);
+        $this->expectExceptionMessage('Method not found.');
+
         $client = new CalculatorService();
         $client->notExistMethod($a = 1, $b = 2);
     }

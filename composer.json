@@ -29,13 +29,15 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.14",
+        "guzzlehttp/guzzle": "^7.0",
         "hyperf/load-balancer": "^2.0",
         "mockery/mockery": "^1.0",
         "phpstan/phpstan": "^0.12.38",
         "phpunit/phpunit": "^7.0"
     },
     "suggest": {
-        "hyperf/load-balancer": "Use load balancer for rpc client."
+        "hyperf/load-balancer": "Use load balancer for rpc client.",
+        "guzzlehttp/guzzle": "Required to use GuzzleHttpTransporter for rpc client.(^6.3|^7.0)"
     },
     "config": {
         "sort-packages": true
