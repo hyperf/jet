@@ -17,6 +17,9 @@ use GuzzleHttp\RequestOptions;
 
 class GuzzleHttpTransporter extends AbstractTransporter
 {
+    /**
+     * @var null|Client
+     */
     protected $client;
 
     /**
