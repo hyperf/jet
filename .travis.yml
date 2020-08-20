@@ -1,0 +1,31 @@
+language: php
+
+sudo: required
+
+matrix:
+  include:
+    - php: 7.2
+    - php: 7.3
+    - php: 7.4
+
+services:
+  - mysql
+  - redis
+  - docker
+
+before_install:
+  - export PHP_MAJOR="$(`phpenv which php` -r 'echo phpversion();' | cut -d '.' -f 1)"
+  - export PHP_MINOR="$(`phpenv which php` -r 'echo phpversion();' | cut -d '.' -f 2)"
+  - echo $PHP_MAJOR
+  - echo $PHP_MINOR
+
+install:
+  - cd $TRAVIS_BUILD_DIR
+
+before_script:
+  - cd $TRAVIS_BUILD_DIR
+  - composer config -g process-timeout 900 && composer update
+
+script:
+  - composer analyse
+  - composer test
