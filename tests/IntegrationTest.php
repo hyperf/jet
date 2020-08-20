@@ -31,11 +31,6 @@ class IntegrationTest extends TestCase
 
     protected $port = 9503;
 
-    protected function setUp()
-    {
-        $this->markTestSkipped('This test needs a complete RPC Server.');
-    }
-
     public function testJsonrpcCallNormalMethodWithClientFactory()
     {
         [$service, $protocol] = $this->registerCalculatorServiceWithJsonrpcProtocol();
