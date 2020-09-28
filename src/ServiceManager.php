@@ -16,6 +16,7 @@ use Hyperf\Jet\Exception\ClientException;
 class ServiceManager
 {
     public const NODES = 'nodes';
+    public const CONSUL = 'consul';
 
     /**
      * @var array

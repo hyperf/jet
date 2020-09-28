@@ -11,11 +11,14 @@ declare(strict_types=1);
  */
 namespace Hyperf\Jet;
 
+use GuzzleHttp\Client;
+use Hyperf\Consul\Catalog;
 use Hyperf\Jet\Exception\ClientException;
 use Hyperf\Jet\ProtocolManager as PM;
 use Hyperf\Jet\ServiceManager as SM;
 use Hyperf\LoadBalancer\Node;
 use Hyperf\Rpc\Contract\TransporterInterface;
+use Hyperf\Utils\Arr;
 
 class ClientFactory
 {
@@ -32,6 +35,32 @@ class ClientFactory
         $pathGenerator = $protocolMetadata[PM::PATH_GENERATOR] ?? null;
         if (! isset($transporter, $packer, $dataFormatter, $pathGenerator)) {
             throw new ClientException(sprintf('The protocol of %s is invalid.', $protocol));
+        }
+        if (isset($serviceMetadata[SM::CONSUL])) {
+            $nodes = with(
+                (new Catalog(function () use ($serviceMetadata) {
+                    return new Client(['base_uri' => $serviceMetadata[SM::CONSUL]]);
+                }))
+                    ->service($service)
+                    ->json(),
+                function ($nodes) use ($protocol) {
+                    return collect($nodes)
+                        ->filter(function ($node) use ($protocol) {
+                            return Arr::get($node, 'ServiceMeta.Protocol') == $protocol;
+                        })
+                        ->transform(function ($node) {
+                            return [
+                                Arr::get($node, 'Address'),
+                                Arr::get($node, 'ServicePort'),
+                            ];
+                        })
+                        ->toArray();
+                }
+            );
+
+            if (count($nodes)) {
+                $serviceMetadata[SM::NODES] = $nodes;
+            }
         }
         if (isset($serviceMetadata[SM::NODES]) && $transporter instanceof TransporterInterface) {
             if ($loadBalancer = $transporter->getLoadBalancer()) {
