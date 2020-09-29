@@ -57,7 +57,7 @@ class ClientFactory
                 $consule = $loadBalancer->select();
                 return with(
                     (new Catalog(function () use ($consule) {
-                        return new Client($consule->config);
+                        return new Client(data_get($consule, 'config', []));
                     }))
                         ->service($service)
                         ->json(),
