@@ -76,7 +76,6 @@ class ClientFactory
                     }
                 );
             });
-            
 
             if (count($nodes)) {
                 $serviceMetadata[SM::NODES] = $nodes;
