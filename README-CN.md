@@ -63,8 +63,15 @@ ServiceManager::register($service = 'CalculatorService', $protocol = 'jsonrpc', 
     ServiceManager::NODES => [
         [$host = '127.0.0.1', $port = 9503],
     ],
-    // 或者绑定 consul
-    ServiceManager::CONSUL => 'http://127.0.0.1:8500',
+    // 或者绑定 consuls
+    ServiceManager::CONSULS => [
+        [
+            'base_uri' => 'http://127.0.0.1:8500',
+            'timeout' => 2.0,
+            // 'auth' => null,
+            // 'token' => null,
+        ],
+    ],
 ]);
 ```
 

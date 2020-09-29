@@ -11,14 +11,16 @@ declare(strict_types=1);
  */
 namespace Hyperf\Jet;
 
+use Hyperf\Utils\Arr;
 use GuzzleHttp\Client;
 use Hyperf\Consul\Catalog;
-use Hyperf\Jet\Exception\ClientException;
-use Hyperf\Jet\ProtocolManager as PM;
-use Hyperf\Jet\ServiceManager as SM;
 use Hyperf\LoadBalancer\Node;
+use Hyperf\LoadBalancer\Random;
+use Hyperf\LoadBalancer\RoundRobin;
+use Hyperf\Jet\ServiceManager as SM;
+use Hyperf\Jet\ProtocolManager as PM;
+use Hyperf\Jet\Exception\ClientException;
 use Hyperf\Rpc\Contract\TransporterInterface;
-use Hyperf\Utils\Arr;
 
 class ClientFactory
 {
@@ -36,10 +38,14 @@ class ClientFactory
         if (! isset($transporter, $packer, $dataFormatter, $pathGenerator)) {
             throw new ClientException(sprintf('The protocol of %s is invalid.', $protocol));
         }
-        if (isset($serviceMetadata[SM::CONSUL])) {
+        if (isset($serviceMetadata[SM::CONSULS]) && is_array($serviceMetadata[SM::CONSULS]) && count($serviceMetadata[SM::CONSULS]) > 0) {
+            $consules = $serviceMetadata[SM::CONSULS];
+            $consule  = (new Random($consules))->select();
+
             $nodes = with(
-                (new Catalog(function () use ($serviceMetadata) {
-                    return new Client(['base_uri' => $serviceMetadata[SM::CONSUL]]);
+                (new Catalog(function () use ($consule) {
+                    /** @var array $consule */
+                    return new Client($consule);
                 }))
                     ->service($service)
                     ->json(),
