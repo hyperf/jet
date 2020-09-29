@@ -41,30 +41,31 @@ class ClientFactory
         if (isset($serviceMetadata[SM::CONSULS]) && is_array($serviceMetadata[SM::CONSULS]) && count($serviceMetadata[SM::CONSULS]) > 0) {
             $consules = $serviceMetadata[SM::CONSULS];
             $loadBalancer = new RoundRobin($consules);
-            $consule = retry(count($consules), function() use ($loadBalancer) {
-                return $loadBalancer->select();
+            $nodes = retry(count($consules), function() use ($loadBalancer, $service, $protocol) {
+                $consule = $loadBalancer->select();
+                return with(
+                    (new Catalog(function () use ($consule) {
+                        /** @var array $consule */
+                        return new Client($consule);
+                    }))
+                        ->service($service)
+                        ->json(),
+                    function ($nodes) use ($protocol) {
+                        return collect($nodes)
+                            ->filter(function ($node) use ($protocol) {
+                                return Arr::get($node, 'ServiceMeta.Protocol') == $protocol;
+                            })
+                            ->transform(function ($node) {
+                                return [
+                                    Arr::get($node, 'Address'),
+                                    Arr::get($node, 'ServicePort'),
+                                ];
+                            })
+                            ->toArray();
+                    }
+                );
             });
-            $nodes = with(
-                (new Catalog(function () use ($consule) {
-                    /** @var array $consule */
-                    return new Client($consule);
-                }))
-                    ->service($service)
-                    ->json(),
-                function ($nodes) use ($protocol) {
-                    return collect($nodes)
-                        ->filter(function ($node) use ($protocol) {
-                            return Arr::get($node, 'ServiceMeta.Protocol') == $protocol;
-                        })
-                        ->transform(function ($node) {
-                            return [
-                                Arr::get($node, 'Address'),
-                                Arr::get($node, 'ServicePort'),
-                            ];
-                        })
-                        ->toArray();
-                }
-            );
+            
 
             if (count($nodes)) {
                 $serviceMetadata[SM::NODES] = $nodes;
