@@ -15,6 +15,7 @@ use Hyperf\Utils\Arr;
 use GuzzleHttp\Client;
 use Hyperf\Consul\Catalog;
 use Hyperf\LoadBalancer\Node;
+use Hyperf\LoadBalancer\RoundRobin;
 use Hyperf\Jet\ServiceManager as SM;
 use Hyperf\Jet\ProtocolManager as PM;
 use Hyperf\Jet\Exception\ClientException;
@@ -38,14 +39,25 @@ class ClientFactory
         }
         if (isset($serviceMetadata[SM::CONSULS]) && is_array($serviceMetadata[SM::CONSULS]) && count($serviceMetadata[SM::CONSULS]) > 0) {
             $consules = $serviceMetadata[SM::CONSULS];
-            $i = 0;
-            $nodes = retry(count($consules), function() use (&$i, $consules, $service, $protocol) {
-                /** @var array[] $consules */
-                $consule = $consules[$i];
-                $i++;
+            $loadBalancer = new RoundRobin();
+            $loadBalancer->setNodes(value(function() use ($consules) {
+                $nodes = [];
+                foreach ($consules as $config) {
+                    $nodes[] = new class($config) extends Node {
+                        public $config;
+                        public function __construct($config = [])
+                        {
+                            $this->config = $config;
+                        }
+                    };
+                }
+                return $nodes;
+            }));
+            $nodes = retry(count($consules), function() use ($loadBalancer, $service, $protocol) {
+                $consule = $loadBalancer->select();
                 return with(
                     (new Catalog(function () use ($consule) {
-                        return new Client($consule);
+                        return new Client($consule->config);
                     }))
                         ->service($service)
                         ->json(),
