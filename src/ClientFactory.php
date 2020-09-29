@@ -40,8 +40,10 @@ class ClientFactory
         }
         if (isset($serviceMetadata[SM::CONSULS]) && is_array($serviceMetadata[SM::CONSULS]) && count($serviceMetadata[SM::CONSULS]) > 0) {
             $consules = $serviceMetadata[SM::CONSULS];
-            $consule  = (new Random($consules))->select();
-
+            $loadBalancer = new RoundRobin($consules);
+            $consule = retry(count($consules), function() use ($consules, $loadBalancer) {
+                return $loadBalancer->select();
+            });
             $nodes = with(
                 (new Catalog(function () use ($consule) {
                     /** @var array $consule */
