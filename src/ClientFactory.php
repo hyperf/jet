@@ -41,7 +41,7 @@ class ClientFactory
         if (isset($serviceMetadata[SM::CONSULS]) && is_array($serviceMetadata[SM::CONSULS]) && count($serviceMetadata[SM::CONSULS]) > 0) {
             $consules = $serviceMetadata[SM::CONSULS];
             $loadBalancer = new RoundRobin($consules);
-            $consule = retry(count($consules), function() use ($consules, $loadBalancer) {
+            $consule = retry(count($consules), function() use ($loadBalancer) {
                 return $loadBalancer->select();
             });
             $nodes = with(
