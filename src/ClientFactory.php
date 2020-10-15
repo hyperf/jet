@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 /**
  * This file is part of Hyperf.
  *
@@ -11,40 +11,40 @@ declare(strict_types=1);
  */
 namespace Hyperf\Jet;
 
-use Hyperf\Utils\Arr;
 use GuzzleHttp\Client;
-use Hyperf\Consul\Catalog;
 use Hyperf\Consul\Health;
+use Hyperf\Jet\Exception\ClientException;
+use Hyperf\Jet\ProtocolManager as PM;
+use Hyperf\Jet\ServiceManager as SM;
 use Hyperf\LoadBalancer\Node;
 use Hyperf\LoadBalancer\RoundRobin;
-use Hyperf\Jet\ServiceManager as SM;
-use Hyperf\Jet\ProtocolManager as PM;
-use Hyperf\Jet\Exception\ClientException;
 use Hyperf\Rpc\Contract\TransporterInterface;
+use Hyperf\Utils\Arr;
 
 class ClientFactory
 {
     public function create(string $service, string $protocol): AbstractClient
     {
         $serviceMetadata = SM::getService($service, $protocol);
-        if (! $serviceMetadata) {
+        if (!$serviceMetadata) {
             throw new ClientException(sprintf('Service %s@%s does not register yet.', $service, $protocol));
         }
         $protocolMetadata = PM::getProtocol($protocol);
-        $transporter = $protocolMetadata[PM::TRANSPORTER] ?? null;
-        $packer = $protocolMetadata[PM::PACKER] ?? null;
-        $dataFormatter = $protocolMetadata[PM::DATA_FORMATTER] ?? null;
-        $pathGenerator = $protocolMetadata[PM::PATH_GENERATOR] ?? null;
-        if (! isset($transporter, $packer, $dataFormatter, $pathGenerator)) {
+        $transporter      = $protocolMetadata[PM::TRANSPORTER] ?? null;
+        $packer           = $protocolMetadata[PM::PACKER] ?? null;
+        $dataFormatter    = $protocolMetadata[PM::DATA_FORMATTER] ?? null;
+        $pathGenerator    = $protocolMetadata[PM::PATH_GENERATOR] ?? null;
+        if (!isset($transporter, $packer, $dataFormatter, $pathGenerator)) {
             throw new ClientException(sprintf('The protocol of %s is invalid.', $protocol));
         }
         if (isset($serviceMetadata[SM::CONSULS]) && is_array($serviceMetadata[SM::CONSULS]) && count($serviceMetadata[SM::CONSULS]) > 0) {
-            $consules = $serviceMetadata[SM::CONSULS];
+            $consules     = $serviceMetadata[SM::CONSULS];
             $loadBalancer = new RoundRobin();
-            $loadBalancer->setNodes(value(function() use ($consules) {
+            $loadBalancer->setNodes(value(function () use ($consules) {
                 $nodes = [];
                 foreach ($consules as $config) {
-                    $nodes[] = new class($config) extends Node {
+                    $nodes[] = new class($config) extends Node
+                    {
                         public $config;
                         public function __construct($config = [])
                         {
@@ -54,7 +54,7 @@ class ClientFactory
                 }
                 return $nodes;
             }));
-            $nodes = retry(count($consules), function() use ($loadBalancer, $service, $protocol) {
+            $nodes = retry(count($consules), function () use ($loadBalancer, $service, $protocol) {
                 $consule = $loadBalancer->select();
                 return with(
                     (new Health(function () use ($consule) {
@@ -67,7 +67,7 @@ class ClientFactory
                             ->filter(function ($node) use ($protocol) {
                                 return Arr::get($node, 'Service.Meta.Protocol') == $protocol;
                             })
-                            ->filter(function($node) {
+                            ->filter(function ($node) {
                                 return Arr::get($node, 'Checks.1.Status') == 'passing';
                             })
                             ->transform(function ($node) {
@@ -108,7 +108,8 @@ class ClientFactory
                 $transporter->port = $port;
             }
         }
-        return new class($service, $transporter, $packer, $dataFormatter, $pathGenerator) extends AbstractClient {
+        return new class($service, $transporter, $packer, $dataFormatter, $pathGenerator) extends AbstractClient
+        {
         };
     }
 }
