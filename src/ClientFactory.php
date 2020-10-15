@@ -14,6 +14,7 @@ namespace Hyperf\Jet;
 use Hyperf\Utils\Arr;
 use GuzzleHttp\Client;
 use Hyperf\Consul\Catalog;
+use Hyperf\Consul\Health;
 use Hyperf\LoadBalancer\Node;
 use Hyperf\LoadBalancer\RoundRobin;
 use Hyperf\Jet\ServiceManager as SM;
@@ -56,7 +57,7 @@ class ClientFactory
             $nodes = retry(count($consules), function() use ($loadBalancer, $service, $protocol) {
                 $consule = $loadBalancer->select();
                 return with(
-                    (new Catalog(function () use ($consule) {
+                    (new Health(function () use ($consule) {
                         return new Client(data_get($consule, 'config', []));
                     }))
                         ->service($service)
@@ -64,12 +65,15 @@ class ClientFactory
                     function ($nodes) use ($protocol) {
                         return collect($nodes)
                             ->filter(function ($node) use ($protocol) {
-                                return Arr::get($node, 'ServiceMeta.Protocol') == $protocol;
+                                return Arr::get($node, 'Service.Meta.Protocol') == $protocol;
+                            })
+                            ->filter(function($node) {
+                                return Arr::get($node, 'Checks.1.Status') == 'passing';
                             })
                             ->transform(function ($node) {
                                 return [
-                                    Arr::get($node, 'Address'),
-                                    Arr::get($node, 'ServicePort'),
+                                    Arr::get($node, 'Service.Address'),
+                                    Arr::get($node, 'Service.Port'),
                                 ];
                             })
                             ->toArray();
