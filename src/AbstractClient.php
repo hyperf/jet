@@ -72,7 +72,6 @@ abstract class AbstractClient
         if (! is_string($ret)) {
             throw new RecvFailedException();
         }
-
         $data = $this->packer->unpack($ret);
 
         if (array_key_exists('result', $data)) {

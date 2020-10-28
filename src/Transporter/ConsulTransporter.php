@@ -61,7 +61,8 @@ class ConsulTransporter extends AbstractTransporter
     protected function transporter()
     {
         if (!$this->transporter instanceof TransporterInterface) {
-            $node = $this->getRoundAvailableNodeFromConsul();
+            $node = $this->roundAvailableNodeFromConsul();
+
             switch ($node->type) {
                 case self::HTTP :
                     $this->transporter = new GuzzleHttpTransporter($node->host, $node->port, $this->config);
@@ -77,9 +78,10 @@ class ConsulTransporter extends AbstractTransporter
         return $this->transporter;
     }
 
-    protected function getRoundAvailableNodeFromConsul()
+    protected function roundAvailableNodeFromConsul()
     {
-        $config       = array_merge(['base_uri' => "http://{$this->host}:{$this->port}"], $this->config);
+        $consul       = $this->roundConsulNode();
+        $config       = array_merge(['base_uri' => sprintf('http://%s:%d', $consul->host, $consul->port)], $this->config);
         $balanceNodes = [];
         with(
             (new Health(function () use ($config) {
@@ -113,5 +115,14 @@ class ConsulTransporter extends AbstractTransporter
         );
 
         return (new RoundRobin($balanceNodes))->select();
+    }
+
+    protected function roundConsulNode()
+    {
+        if ($this->getLoadBalancer()) {
+            return $this->getLoadBalancer()->select();
+        }
+
+        return $this;
     }
 }

@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Jet\Transporter;
 
 use GuzzleHttp\Client;
@@ -34,10 +35,10 @@ class GuzzleHttpTransporter extends AbstractTransporter
 
     public function __construct(string $host = '', int $port = 9501, array $config = [])
     {
-        $this->host = $host;
-        $this->port = $port;
+        $this->host   = $host;
+        $this->port   = $port;
         $this->config = array_merge_recursive($config, [
-            'headers' => [
+            'headers'     => [
                 'Content-Type' => 'application/json',
             ],
             'http_errors' => false,
@@ -60,12 +61,18 @@ class GuzzleHttpTransporter extends AbstractTransporter
 
     protected function client()
     {
-        if (! $this->client instanceof Client) {
-            if (! isset($this->config['handler'])) {
+        if (!$this->client instanceof Client) {
+            if (!isset($this->config['handler'])) {
                 $this->config['handler'] = HandlerStack::create();
             }
-            if (! isset($this->config['base_uri'])) {
-                $this->config['base_uri'] = sprintf('http://%s:%d', $this->host, $this->port);
+            if (!isset($this->config['base_uri'])) {
+                if ($this->getLoadBalancer()) {
+                    $node = $this->getLoadBalancer()->select();
+                } else {
+                    $node = $this;
+                }
+
+                $this->config['base_uri'] = sprintf('http://%s:%d', $node->host, $node->port);
             }
 
             $this->client = new Client($this->config);
