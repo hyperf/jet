@@ -25,7 +25,7 @@ class TcpRecvOverflowTest extends TestCase
     public function testTcpTransporterRecvOverflow()
     {
         $client   = new CalculatorService();
-        $sendData = str_repeat('data', 1000000);
+        $sendData = str_repeat('data', 1000);
         try {
             $result = $client->getSendData($sendData);
         } catch (\Throwable $exception) {
@@ -34,6 +34,6 @@ class TcpRecvOverflowTest extends TestCase
             throw $exception;
         }
 
-        $this->assertSame($sendData, $result);
+        $this->assertSame(str_repeat($sendData, 10000), $result);
     }
 }
