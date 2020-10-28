@@ -1,0 +1,30 @@
+name: PHPUnit for Jet
+
+on: [push, pull_request]
+
+jobs:
+  ci:
+    name: Test on PHP ${{ matrix.php-version }}
+    runs-on: "${{ matrix.os }}"
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        php-version: ['7.2', '7.3', '7.4']
+      max-parallel: 3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: phpize
+          coverage: none
+      - name: Setup Packages
+        run: composer update -o
+      - name: Setup Services
+        run: docker run -d --name jsonrpc -p 9501:9501 -p 9502:9502 -p 9503:9503 -p 9504:9504 limingxinleo/hyperf-jsonrpc-demo:latest
+      - name: Run Test Cases
+        run: |
+          composer analyse src
+          composer test
