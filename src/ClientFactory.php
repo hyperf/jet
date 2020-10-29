@@ -14,49 +14,73 @@ namespace Hyperf\Jet;
 use Hyperf\Jet\Exception\ClientException;
 use Hyperf\Jet\ProtocolManager as PM;
 use Hyperf\Jet\ServiceManager as SM;
+use Hyperf\LoadBalancer\LoadBalancerInterface;
 use Hyperf\LoadBalancer\Node;
+use Hyperf\LoadBalancer\RoundRobin;
+use Hyperf\Rpc\Contract\DataFormatterInterface;
+use Hyperf\Rpc\Contract\PackerInterface;
+use Hyperf\Rpc\Contract\PathGeneratorInterface;
 use Hyperf\Rpc\Contract\TransporterInterface;
 
 class ClientFactory
 {
     public function create(string $service, string $protocol): AbstractClient
     {
-        $serviceMetadata = SM::getService($service, $protocol);
-        if (! $serviceMetadata) {
-            throw new ClientException(sprintf('Service %s@%s does not register yet.', $service, $protocol));
-        }
+        [$transporter, $packer, $dataFormatter, $pathGenerator] = $this->protocolGenerate($protocol);
+
+        $transporter->setLoadBalancer($this->getLoadBalancer($service, $protocol));
+
+        return new class($service, $transporter, $packer, $dataFormatter, $pathGenerator) extends AbstractClient {
+        };
+    }
+
+    protected function getLoadBalancer($service, $protocol): LoadBalancerInterface
+    {
+        $nodeData = SM::getService($service, $protocol)[SM::NODES] ?? [];
+
+        return (new RoundRobin())->setNodes(value(function () use ($nodeData, $service, $protocol) {
+            $nodes = [];
+            foreach ($nodeData ?? [] as [$host, $port]) {
+                $nodes[] = new Node($host, $port);
+            }
+
+            if (! count($nodes)) {
+                throw new ClientException(sprintf('Service %s@%s does not register yet.', $service, $protocol));
+            }
+
+            return $nodes;
+        }));
+    }
+
+    protected function protocolGenerate($protocol): array
+    {
         $protocolMetadata = PM::getProtocol($protocol);
         $transporter = $protocolMetadata[PM::TRANSPORTER] ?? null;
         $packer = $protocolMetadata[PM::PACKER] ?? null;
         $dataFormatter = $protocolMetadata[PM::DATA_FORMATTER] ?? null;
         $pathGenerator = $protocolMetadata[PM::PATH_GENERATOR] ?? null;
-        if (! isset($transporter, $packer, $dataFormatter, $pathGenerator)) {
-            throw new ClientException(sprintf('The protocol of %s is invalid.', $protocol));
+
+        $this->assertProtocolTypes($transporter, $packer, $dataFormatter, $pathGenerator, $protocol);
+
+        return [$transporter, $packer, $dataFormatter, $pathGenerator];
+    }
+
+    protected function assertProtocolTypes($transporter, $packer, $dataFormatter, $pathGenerator, $protocol)
+    {
+        if (! $transporter instanceof TransporterInterface) {
+            throw new ClientException(sprintf('The protocol of %s transporter is invalid.', $protocol));
         }
-        if (isset($serviceMetadata[SM::NODES]) && $transporter instanceof TransporterInterface) {
-            if ($loadBalancer = $transporter->getLoadBalancer()) {
-                $loadBalancer->setNodes(value(function () use ($serviceMetadata) {
-                    $nodes = [];
-                    foreach ($serviceMetadata[SM::NODES] ?? [] as [$host, $port]) {
-                        $nodes[] = new Node($host, $port);
-                    }
-                    return $nodes;
-                }));
-            } elseif (count($serviceMetadata[SM::NODES]) === 1 && property_exists($transporter, 'host') && property_exists($transporter, 'port')) {
-                $node = current($serviceMetadata[SM::NODES]);
-                if (class_exists(Node::class) && $node instanceof Node) {
-                    $host = $node->host;
-                    $port = $node->port;
-                } elseif (is_array($node)) {
-                    [$host, $port] = $node;
-                } else {
-                    throw new ClientException('Invalid node info.');
-                }
-                $transporter->host = $host;
-                $transporter->port = $port;
-            }
+
+        if (! $packer instanceof PackerInterface) {
+            throw new ClientException(sprintf('The protocol of %s packer is invalid.', $protocol));
         }
-        return new class($service, $transporter, $packer, $dataFormatter, $pathGenerator) extends AbstractClient {
-        };
+
+        if (! $dataFormatter instanceof DataFormatterInterface) {
+            throw new ClientException(sprintf('The protocol of %s is data formatter invalid.', $protocol));
+        }
+
+        if (! $pathGenerator instanceof PathGeneratorInterface) {
+            throw new ClientException(sprintf('The protocol of %s is path generator invalid.', $protocol));
+        }
     }
 }
