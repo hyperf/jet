@@ -72,7 +72,7 @@ class StreamSocketTransporter extends AbstractTransporter
             $except = null;
             while (stream_select($read, $write, $except, 0, $timeout)) {
                 foreach ($read as $r) {
-                    $buf .= $t = fread($r, 8192);
+                    $buf .= fread($r, 8192);
                 }
             }
 
