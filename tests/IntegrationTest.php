@@ -63,6 +63,13 @@ class IntegrationTest extends TestCase
         $this->assertSame($a + $b, $result);
     }
 
+    public function testJsonrpcCallLongData()
+    {
+        $client = new CalculatorService();
+        $res = $client->repeat(1, 100000);
+        $this->assertSame(str_repeat('1', 100000), $res);
+    }
+
     public function testJsonrpcCallNotExistMethodWithCustomClient()
     {
         $this->expectException(ServerException::class);
