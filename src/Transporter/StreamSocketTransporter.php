@@ -63,11 +63,11 @@ class StreamSocketTransporter extends AbstractTransporter
     public function recv()
     {
         $buf     = '';
-        $timeout = 10000;
+        $timeout = 1000;
 
         stream_set_blocking($this->client, false);
 
-        return retry(10, function () use (&$buf, &$timeout) {
+        return retry(12, function () use (&$buf, &$timeout) {
             $read   = [$this->client];
             $write  = null;
             $except = null;
