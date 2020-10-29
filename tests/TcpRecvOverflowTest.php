@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace HyperfTest\Jet;
 
 use Hyperf\Jet\Exception\ServerException;
@@ -24,7 +23,7 @@ class TcpRecvOverflowTest extends TestCase
 {
     public function testTcpTransporterRecvOverflow()
     {
-        $client   = new CalculatorService();
+        $client = new CalculatorService();
         $sendData = str_repeat('data', 1000);
         try {
             $result = $client->getSendData($sendData);

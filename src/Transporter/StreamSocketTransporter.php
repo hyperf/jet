@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\Jet\Transporter;
 
 use Hyperf\Jet\Exception\ClientException;
@@ -44,8 +43,8 @@ class StreamSocketTransporter extends AbstractTransporter
 
     public function __construct(string $host = '', int $port = 9501, float $timeout = 1.0)
     {
-        $this->host    = $host;
-        $this->port    = $port;
+        $this->host = $host;
+        $this->port = $port;
         $this->timeout = $timeout;
     }
 
@@ -62,14 +61,14 @@ class StreamSocketTransporter extends AbstractTransporter
 
     public function recv()
     {
-        $buf     = '';
+        $buf = '';
         $timeout = 1000;
 
         stream_set_blocking($this->client, false);
 
         return retry(12, function () use (&$buf, &$timeout) {
-            $read   = [$this->client];
-            $write  = null;
+            $read = [$this->client];
+            $write = null;
             $except = null;
             while (stream_select($read, $write, $except, 0, $timeout)) {
                 foreach ($read as $r) {
@@ -77,7 +76,7 @@ class StreamSocketTransporter extends AbstractTransporter
                 }
             }
 
-            if (!$buf) {
+            if (! $buf) {
                 $timeout *= 2;
 
                 throw new \Exception('no recv data');
@@ -94,7 +93,7 @@ class StreamSocketTransporter extends AbstractTransporter
         } else {
             $node = $this;
         }
-        if (!$node->host || !$node->port) {
+        if (! $node->host || ! $node->port) {
             throw new ClientException(sprintf('Invalid host %s or port %s.', $node->host, $node->port));
         }
 
@@ -118,7 +117,7 @@ class StreamSocketTransporter extends AbstractTransporter
             throw new ConnectionException(sprintf('[%d] %s', $errno, $errstr));
         }
 
-        $this->client      = $client;
+        $this->client = $client;
         $this->isConnected = true;
     }
 
