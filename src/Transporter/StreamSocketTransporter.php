@@ -13,6 +13,7 @@ namespace Hyperf\Jet\Transporter;
 
 use Hyperf\Jet\Exception\ClientException;
 use Hyperf\Jet\Exception\ConnectionException;
+use Hyperf\Jet\Exception\RecvFailedException;
 
 class StreamSocketTransporter extends AbstractTransporter
 {
@@ -61,7 +62,32 @@ class StreamSocketTransporter extends AbstractTransporter
 
     public function recv()
     {
-        return fread($this->client, 65535);
+        $buf = '';
+        $timeout = 1000;
+
+        stream_set_blocking($this->client, false);
+
+        // The maximum number of retries is 12, and 1000 microseconds is the minimum waiting time.
+        // The waiting time is doubled each time until the server writes data to the buffer.
+        // Usually, the data can be obtained within 1 microsecond.
+        return retry(12, function () use (&$buf, &$timeout) {
+            $read = [$this->client];
+            $write = null;
+            $except = null;
+            while (stream_select($read, $write, $except, 0, $timeout)) {
+                foreach ($read as $r) {
+                    $buf .= fread($r, 8192);
+                }
+            }
+
+            if (! $buf) {
+                $timeout *= 2;
+
+                throw new RecvFailedException('No data was received');
+            }
+
+            return $buf;
+        });
     }
 
     protected function getTarget(): array
@@ -74,6 +100,7 @@ class StreamSocketTransporter extends AbstractTransporter
         if (! $node->host || ! $node->port) {
             throw new ClientException(sprintf('Invalid host %s or port %s.', $node->host, $node->port));
         }
+
         return [$node->host, $node->port];
     }
 
