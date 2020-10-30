@@ -65,7 +65,28 @@ ServiceManager::register($service = 'CalculatorService', $protocol = 'jsonrpc', 
     ],
 ]);
 ```
+// 如果需要使用 Consul 服务
+```php
+<?php
 
+use Hyperf\Jet\DataFormatter\DataFormatter;
+use Hyperf\Jet\Packer\JsonEofPacker;
+use Hyperf\Jet\PathGenerator\PathGenerator;
+use Hyperf\Jet\ProtocolManager;
+use Hyperf\Jet\Transporter\ConsulTransporter;
+
+// $config 是 Consul 的配置，并且会合并到对应的 TCP 或者 HTTP Transporter 中，
+// 如果在 TCP 协议中传输，如果要设置超时，需要添加 ['timeout'=>1.0] 到你的 $config
+ 
+
+ProtocolManager::register($protocol = 'consul', [
+    ProtocolManager::TRANSPORTER => new ConsulTransporter($host,$port,$config),
+    ProtocolManager::PACKER => new JsonEofPacker(),
+    ProtocolManager::PATH_GENERATOR => new PathGenerator(),
+    ProtocolManager::DATA_FORMATTER => new DataFormatter(),
+]);
+
+```
 ## 调用 RPC 方法
 
 ### 通过 ClientFactory 调用

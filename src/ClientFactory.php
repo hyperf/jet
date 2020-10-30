@@ -15,6 +15,7 @@ use Hyperf\Jet\Exception\ClientException;
 use Hyperf\Jet\ProtocolManager as PM;
 use Hyperf\Jet\ServiceManager as SM;
 use Hyperf\Jet\Transporter\AbstractTransporter;
+use Hyperf\Jet\Transporter\ConsulTransporter;
 use Hyperf\LoadBalancer\Node;
 use Hyperf\Rpc\Contract\DataFormatterInterface;
 use Hyperf\Rpc\Contract\PackerInterface;
@@ -29,8 +30,20 @@ class ClientFactory
 
         $this->selectNodesForTransporter($transporter, $service, $protocol);
 
+        $this->adapterConsul($transporter, $service);
+
         return new class($service, $transporter, $packer, $dataFormatter, $pathGenerator) extends AbstractClient {
         };
+    }
+
+    /**
+     * @param AbstractTransporter $transporter
+     */
+    protected function adapterConsul(TransporterInterface $transporter, string $service)
+    {
+        if ($transporter instanceof ConsulTransporter) {
+            $transporter->activeConsulService($service);
+        }
     }
 
     /**
