@@ -25,7 +25,7 @@ class ClientFactory
     public function create(string $service, string $protocol): AbstractClient
     {
         /**
-         * @var TransporterInterface $transporter
+         * @var TransporterInterface $transporterservice
          * @var PackerInterface $packer
          * @var DataFormatterInterface $dataFormatter
          * @var PathGeneratorInterface $pathGenerator
@@ -57,7 +57,7 @@ class ClientFactory
             throw new ClientException(sprintf('Service %s@%s does not register yet.', $service, $protocol));
         }
 
-        return value(function () use ($nodeData, $service) {
+        return value(function () use ($nodeData) {
             $nodes = [];
             foreach ($nodeData ?? [] as [$host, $port]) {
                 $nodes[] = new Node($host, $port);
