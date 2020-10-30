@@ -48,7 +48,7 @@ class ClientFactory
                 return $transporter->setLoadBalancer($transporter->getLoadBalancer()->setNodes($balanceNodes));
             }
 
-            return $transporter->setLoadBalancer(null);
+            return $transporter->removeLoadBalancer();
         }
 
         if ($randomNodes = $this->getRandomNodes($service, $protocol)) {
