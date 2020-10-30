@@ -14,9 +14,7 @@ namespace Hyperf\Jet;
 use Hyperf\Jet\Exception\ClientException;
 use Hyperf\Jet\ProtocolManager as PM;
 use Hyperf\Jet\ServiceManager as SM;
-use Hyperf\LoadBalancer\LoadBalancerInterface;
 use Hyperf\LoadBalancer\Node;
-use Hyperf\LoadBalancer\RoundRobin;
 use Hyperf\Rpc\Contract\DataFormatterInterface;
 use Hyperf\Rpc\Contract\PackerInterface;
 use Hyperf\Rpc\Contract\PathGeneratorInterface;
@@ -26,33 +24,63 @@ class ClientFactory
 {
     public function create(string $service, string $protocol): AbstractClient
     {
-        [$transporter, $packer, $dataFormatter, $pathGenerator] = $this->protocolGenerate($protocol);
+        /**
+         * @var TransporterInterface $transporter
+         * @var PackerInterface $packer
+         * @var DataFormatterInterface $dataFormatter
+         * @var PathGeneratorInterface $pathGenerator
+         */
+        [$transporter, $packer, $dataFormatter, $pathGenerator] = $this->protocolComponentGenerate($protocol);
 
-        $transporter->setLoadBalancer($this->getLoadBalancer($service, $protocol));
+        $this->selectNodesForTransporter($transporter, $service, $protocol);
 
         return new class($service, $transporter, $packer, $dataFormatter, $pathGenerator) extends AbstractClient {
         };
     }
 
-    protected function getLoadBalancer($service, $protocol): LoadBalancerInterface
+    protected function selectNodesForTransporter(TransporterInterface $transporter, $service, $protocol)
+    {
+        // If transporter self owns load balancer , just use it.
+        // else use random node from config.
+        if ($transporter->getLoadBalancer()) {
+            $transporter->setLoadBalancer($this->getLoadBalancerNodes($service, $protocol));
+        } else {
+            [$transporter->host, $transporter->port] = $this->getRandomNodes($service, $protocol);
+        }
+    }
+
+    protected function getLoadBalancerNodes($service, $protocol)
     {
         $nodeData = SM::getService($service, $protocol)[SM::NODES] ?? [];
 
-        return (new RoundRobin())->setNodes(value(function () use ($nodeData, $service, $protocol) {
+        if (! count($nodeData)) {
+            throw new ClientException(sprintf('Service %s@%s does not register yet.', $service, $protocol));
+        }
+
+        return value(function () use ($nodeData, $service, $protocol) {
             $nodes = [];
             foreach ($nodeData ?? [] as [$host, $port]) {
                 $nodes[] = new Node($host, $port);
             }
 
-            if (! count($nodes)) {
-                throw new ClientException(sprintf('Service %s@%s does not register yet.', $service, $protocol));
-            }
-
             return $nodes;
-        }));
+        });
     }
 
-    protected function protocolGenerate($protocol): array
+    protected function getRandomNodes($service, $protocol)
+    {
+        $nodeData = SM::getService($service, $protocol)[SM::NODES] ?? [];
+
+        if (! count($nodeData)) {
+            throw new ClientException(sprintf('Service %s@%s does not register yet.', $service, $protocol));
+        }
+
+        $key = array_rand($nodeData);
+
+        return $nodeData[$key];
+    }
+
+    protected function protocolComponentGenerate($protocol): array
     {
         $protocolMetadata = PM::getProtocol($protocol);
         $transporter = $protocolMetadata[PM::TRANSPORTER] ?? null;
@@ -60,13 +88,6 @@ class ClientFactory
         $dataFormatter = $protocolMetadata[PM::DATA_FORMATTER] ?? null;
         $pathGenerator = $protocolMetadata[PM::PATH_GENERATOR] ?? null;
 
-        $this->assertProtocolTypes($transporter, $packer, $dataFormatter, $pathGenerator, $protocol);
-
-        return [$transporter, $packer, $dataFormatter, $pathGenerator];
-    }
-
-    protected function assertProtocolTypes($transporter, $packer, $dataFormatter, $pathGenerator, $protocol)
-    {
         if (! $transporter instanceof TransporterInterface) {
             throw new ClientException(sprintf('The protocol of %s transporter is invalid.', $protocol));
         }
@@ -82,5 +103,7 @@ class ClientFactory
         if (! $pathGenerator instanceof PathGeneratorInterface) {
             throw new ClientException(sprintf('The protocol of %s is path generator invalid.', $protocol));
         }
+
+        return [$transporter, $packer, $dataFormatter, $pathGenerator];
     }
 }
