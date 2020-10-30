@@ -65,7 +65,12 @@ class GuzzleHttpTransporter extends AbstractTransporter
                 $this->config['handler'] = HandlerStack::create();
             }
             if (! isset($this->config['base_uri'])) {
-                $this->config['base_uri'] = sprintf('http://%s:%d', $this->host, $this->port);
+                if ($this->getLoadBalancer()) {
+                    $node = $this->getLoadBalancer()->select();
+                } else {
+                    $node = $this;
+                }
+                $this->config['base_uri'] = sprintf('http://%s:%d', $node->host, $node->port);
             }
 
             $this->client = new Client($this->config);
