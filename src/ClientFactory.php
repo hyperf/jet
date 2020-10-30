@@ -35,7 +35,6 @@ class ClientFactory
 
     /**
      * @param AbstractTransporter $transporter
-     * @return TransporterInterface
      */
     protected function selectNodesForTransporter(TransporterInterface $transporter, string $service, string $protocol): void
     {
