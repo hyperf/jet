@@ -42,13 +42,13 @@ class ClientFactory
     {
         // If transporter self owns load balancer , just use it.
         // else use random node from config.
-        // if not exist balance load , will remove transporter load balancer.
+        // If not exist balance load , will add transporter self host, port into the LoadBalancer.
         if ($transporter->getLoadBalancer()) {
             if ($balanceNodes = $this->getLoadBalancerNodes($service, $protocol)) {
                 return $transporter->setLoadBalancer($transporter->getLoadBalancer()->setNodes($balanceNodes));
             }
 
-            return $transporter->removeLoadBalancer();
+            return $transporter->setLoadBalancer($transporter->getLoadBalancer()->setNodes([new Node($transporter->host, $transporter->port)]));
         }
 
         if ($randomNodes = $this->getRandomNodes($service, $protocol)) {
