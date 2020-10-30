@@ -36,7 +36,7 @@ abstract class AbstractTransporter implements TransporterInterface
         return $this->loadBalancer;
     }
 
-    public function setLoadBalancer(LoadBalancerInterface $loadBalancer): TransporterInterface
+    public function setLoadBalancer(?LoadBalancerInterface $loadBalancer): TransporterInterface
     {
         $this->loadBalancer = $loadBalancer;
         return $this;
