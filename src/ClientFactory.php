@@ -25,12 +25,6 @@ class ClientFactory
 {
     public function create(string $service, string $protocol): AbstractClient
     {
-        /**
-         * @var TransporterInterface $transporterservice
-         * @var PackerInterface $packer
-         * @var DataFormatterInterface $dataFormatter
-         * @var PathGeneratorInterface $pathGenerator
-         */
         [$transporter, $packer, $dataFormatter, $pathGenerator] = $this->protocolComponentGenerate($protocol);
 
         $this->selectNodesForTransporter($transporter, $service, $protocol);
