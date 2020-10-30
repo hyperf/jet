@@ -14,6 +14,7 @@ namespace Hyperf\Jet;
 use Hyperf\Jet\Exception\ClientException;
 use Hyperf\Jet\ProtocolManager as PM;
 use Hyperf\Jet\ServiceManager as SM;
+use Hyperf\Jet\Transporter\AbstractTransporter;
 use Hyperf\LoadBalancer\Node;
 use Hyperf\Rpc\Contract\DataFormatterInterface;
 use Hyperf\Rpc\Contract\PackerInterface;
@@ -38,17 +39,23 @@ class ClientFactory
         };
     }
 
-    protected function selectNodesForTransporter(TransporterInterface $transporter, $service, $protocol)
+    /**
+     * @param AbstractTransporter $transporter
+     * @return TransporterInterface
+     */
+    protected function selectNodesForTransporter(TransporterInterface $transporter, string $service, string $protocol)
     {
         // If transporter self owns load balancer , just use it.
         // else use random node from config.
         // If not exist balance load , will add transporter self host, port into the LoadBalancer.
-        if ($transporter->getLoadBalancer()) {
+        if ($balancer = $transporter->getLoadBalancer()) {
             if ($balanceNodes = $this->getLoadBalancerNodes($service, $protocol)) {
-                return $transporter->setLoadBalancer($transporter->getLoadBalancer()->setNodes($balanceNodes));
+                $balancer->setNodes($balanceNodes);
+            } else {
+                $balancer->setNodes([new Node($transporter->host, $transporter->port)]);
             }
 
-            return $transporter->setLoadBalancer($transporter->getLoadBalancer()->setNodes([new Node($transporter->host, $transporter->port)]));
+            return $transporter;
         }
 
         if ($randomNodes = $this->getRandomNodes($service, $protocol)) {
