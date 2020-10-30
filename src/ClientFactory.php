@@ -42,20 +42,27 @@ class ClientFactory
     {
         // If transporter self owns load balancer , just use it.
         // else use random node from config.
+        // if not exist balance load , will remove transporter load balancer.
         if ($transporter->getLoadBalancer()) {
-            $transporter->setLoadBalancer($this->getLoadBalancerNodes($service, $protocol));
-        } else {
-            [$transporter->host, $transporter->port] = $this->getRandomNodes($service, $protocol);
+            if ($balanceNodes = $this->getLoadBalancerNodes($service, $protocol)) {
+                return $transporter->setLoadBalancer($transporter->getLoadBalancer()->setNodes($balanceNodes));
+            }
+
+            return $transporter->setLoadBalancer(null);
         }
+
+        if ($randomNodes = $this->getRandomNodes($service, $protocol)) {
+            [$transporter->host, $transporter->port] = $randomNodes;
+
+            return $transporter;
+        }
+
+        return $transporter;
     }
 
-    protected function getLoadBalancerNodes($service, $protocol)
+    protected function getLoadBalancerNodes($service, $protocol): array
     {
         $nodeData = SM::getService($service, $protocol)[SM::NODES] ?? [];
-
-        if (! count($nodeData)) {
-            throw new ClientException(sprintf('Service %s@%s does not register yet.', $service, $protocol));
-        }
 
         return value(function () use ($nodeData) {
             $nodes = [];
@@ -72,7 +79,7 @@ class ClientFactory
         $nodeData = SM::getService($service, $protocol)[SM::NODES] ?? [];
 
         if (! count($nodeData)) {
-            throw new ClientException(sprintf('Service %s@%s does not register yet.', $service, $protocol));
+            return $nodeData;
         }
 
         $key = array_rand($nodeData);
