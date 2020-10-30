@@ -43,7 +43,7 @@ class ClientFactory
      * @param AbstractTransporter $transporter
      * @return TransporterInterface
      */
-    protected function selectNodesForTransporter(TransporterInterface $transporter, string $service, string $protocol)
+    protected function selectNodesForTransporter(TransporterInterface $transporter, string $service, string $protocol): void
     {
         // If transporter self owns load balancer , just use it.
         // else use random node from config.
@@ -55,30 +55,23 @@ class ClientFactory
                 $balancer->setNodes([new Node($transporter->host, $transporter->port)]);
             }
 
-            return $transporter;
+            return;
         }
 
         if ($randomNodes = $this->getRandomNodes($service, $protocol)) {
             [$transporter->host, $transporter->port] = $randomNodes;
-
-            return $transporter;
         }
-
-        return $transporter;
     }
 
     protected function getLoadBalancerNodes($service, $protocol): array
     {
         $nodeData = SM::getService($service, $protocol)[SM::NODES] ?? [];
+        $nodes = [];
+        foreach ($nodeData ?? [] as [$host, $port]) {
+            $nodes[] = new Node($host, $port);
+        }
 
-        return value(function () use ($nodeData) {
-            $nodes = [];
-            foreach ($nodeData ?? [] as [$host, $port]) {
-                $nodes[] = new Node($host, $port);
-            }
-
-            return $nodes;
-        });
+        return $nodes;
     }
 
     protected function getRandomNodes($service, $protocol)
