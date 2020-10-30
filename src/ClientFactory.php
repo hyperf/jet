@@ -57,7 +57,7 @@ class ClientFactory
             throw new ClientException(sprintf('Service %s@%s does not register yet.', $service, $protocol));
         }
 
-        return value(function () use ($nodeData, $service, $protocol) {
+        return value(function () use ($nodeData, $service) {
             $nodes = [];
             foreach ($nodeData ?? [] as [$host, $port]) {
                 $nodes[] = new Node($host, $port);
