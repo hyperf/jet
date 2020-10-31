@@ -23,6 +23,7 @@ $agent = new Agent(function () {
 
 $protocols = ['jsonrpc-http', 'jsonrpc'];
 $ports = [9502, 9503];
+$host = PHP_OS === 'Darwin' ? 'docker.for.mac.host.internal' : 'localhost';
 foreach ($protocols as $i => $protocol) {
     // $agent
     $requestBody = [
@@ -39,8 +40,7 @@ foreach ($protocols as $i => $protocol) {
         case 'jsonrpc-http':
             $requestBody['Check'] = [
                 'DeregisterCriticalServiceAfter' => '90m',
-                // 'HTTP' => "http://docker.for.mac.host.internal:{$ports[$i]}/",
-                'HTTP' => "http://localhost:{$ports[$i]}/",
+                'HTTP' => "http://{$host}:{$ports[$i]}/",
                 'Interval' => '1s',
             ];
             break;
@@ -48,8 +48,7 @@ foreach ($protocols as $i => $protocol) {
         case 'jsonrpc-tcp-length-check':
             $requestBody['Check'] = [
                 'DeregisterCriticalServiceAfter' => '90m',
-                'TCP' => "docker.for.mac.host.internal:{$ports[$i]}",
-                'TCP' => "localhost:{$ports[$i]}",
+                'TCP' => "{$host}:{$ports[$i]}",
                 'Interval' => '1s',
             ];
             break;
