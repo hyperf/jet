@@ -21,6 +21,8 @@ class ProtocolManager
 
     public const PACKER = 'p';
 
+    public const NODE_SELECTOR = 'ns';
+
     /**
      * @var array
      */

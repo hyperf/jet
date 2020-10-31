@@ -12,8 +12,9 @@ declare(strict_types=1);
 namespace HyperfTest\Jet\Stub;
 
 use Hyperf\Jet\AbstractClient;
+use Hyperf\Jet\NodeSelector\NodeSelector;
 use Hyperf\Jet\Packer\JsonEofPacker;
-use Hyperf\Jet\Transporter\ConsulTransporter;
+use Hyperf\Jet\Transporter\GuzzleHttpTransporter;
 use Hyperf\Rpc\Contract\DataFormatterInterface;
 use Hyperf\Rpc\Contract\PackerInterface;
 use Hyperf\Rpc\Contract\PathGeneratorInterface;
@@ -28,7 +29,9 @@ class ConsulCalculatorService extends AbstractClient
         ?DataFormatterInterface $dataFormatter = null,
         ?PathGeneratorInterface $pathGenerator = null
     ) {
-        $transporter = new ConsulTransporter('127.0.0.1', 8500, [], $service);
+        $transporter = new GuzzleHttpTransporter();
+        $nodeSelector = new NodeSelector('127.0.0.1', 8500, $service);
+        [$transporter->host, $transporter->port] = $nodeSelector->selectRandomNode();
         $packer = new JsonEofPacker();
         parent::__construct($service, $transporter, $packer, $dataFormatter, $pathGenerator);
     }
