@@ -20,12 +20,12 @@ before_install:
 install:
   - cd $TRAVIS_BUILD_DIR
   - docker run -d --name jsonrpc -p 9501:9501 -p 9502:9502 -p 9503:9503 -p 9504:9504 limingxinleo/hyperf-jsonrpc-demo:latest
-  - docker run -d --name dev-consul -e CONSUL_BIND_INTERFACE=eth0 -p 8500:8500 --network host consul
+  - docker run -d --name dev-consul -e CONSUL_BIND_INTERFACE=eth0 --network host consul
 
 before_script:
   - cd $TRAVIS_BUILD_DIR
   - composer config -g process-timeout 900 && composer update
-  - sleep 10
+  - sleep 30
   - php ./tests/register.php
 
 script:

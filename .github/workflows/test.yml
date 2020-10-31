@@ -25,7 +25,7 @@ jobs:
       - name: Setup Services
         run: |
           docker run -d --name jsonrpc -p 9501:9501 -p 9502:9502 -p 9503:9503 -p 9504:9504 limingxinleo/hyperf-jsonrpc-demo:latest
-          docker run -d --name dev-consul -e CONSUL_BIND_INTERFACE=eth0 -p 8500:8500 --network host consul
+          docker run -d --name dev-consul -e CONSUL_BIND_INTERFACE=eth0 --network host consul
           sleep 10
           php ./tests/register.php
       - name: Run Test Cases
