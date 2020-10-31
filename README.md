@@ -47,6 +47,27 @@ ProtocolManager::register($protocol = 'jsonrpc', [
     ProtocolManager::DATA_FORMATTER => new DataFormatter(),
 ]);
 ```
+If you use consul, you could register a JSONRPC protocol like below:
+```php
+<?php
+
+use Hyperf\Jet\DataFormatter\DataFormatter;
+use Hyperf\Jet\Packer\JsonEofPacker;
+use Hyperf\Jet\PathGenerator\PathGenerator;
+use Hyperf\Jet\ProtocolManager;
+use Hyperf\Jet\Transporter\ConsulTransporter;
+
+// $config is consul support features like ACL，TIMEOUT,
+// if transporter is tcp protocol,if you want timeout,you should add ['timeout'=>1.0] in you $config 
+
+ProtocolManager::register($protocol = 'consul', [
+    ProtocolManager::TRANSPORTER => new ConsulTransporter($host,$port,$config),
+    ProtocolManager::PACKER => new JsonEofPacker(),
+    ProtocolManager::PATH_GENERATOR => new PathGenerator(),
+    ProtocolManager::DATA_FORMATTER => new DataFormatter(),
+]);
+
+```
 
 ## Register service
 

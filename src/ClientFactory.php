@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Hyperf\Jet;
 
 use Hyperf\Jet\Exception\ClientException;
+use Hyperf\Jet\NodeSelector\NodeSelector;
 use Hyperf\Jet\ProtocolManager as PM;
 use Hyperf\Jet\ServiceManager as SM;
 use Hyperf\Jet\Transporter\AbstractTransporter;
@@ -25,9 +26,9 @@ class ClientFactory
 {
     public function create(string $service, string $protocol): AbstractClient
     {
-        [$transporter, $packer, $dataFormatter, $pathGenerator] = $this->protocolComponentGenerate($protocol);
+        [$transporter, $packer, $dataFormatter, $pathGenerator, $nodeSelector] = $this->protocolComponentGenerate($protocol);
 
-        $this->selectNodesForTransporter($transporter, $service, $protocol);
+        $this->selectNodesForTransporter($transporter, $nodeSelector, $service, $protocol);
 
         return new class($service, $transporter, $packer, $dataFormatter, $pathGenerator) extends AbstractClient {
         };
@@ -35,14 +36,23 @@ class ClientFactory
 
     /**
      * @param AbstractTransporter $transporter
+     * @param mixed $nodeSelector
      */
-    protected function selectNodesForTransporter(TransporterInterface $transporter, string $service, string $protocol): void
+    protected function selectNodesForTransporter(TransporterInterface $transporter, $nodeSelector, string $service, string $protocol): void
     {
         // If transporter self owns load balancer , just use it.
         // else use random node from config.
         // If not exist balance load , will add transporter self host, port into the LoadBalancer.
         if ($balancer = $transporter->getLoadBalancer()) {
-            if ($balanceNodes = $this->getLoadBalancerNodes($service, $protocol)) {
+            // If use node selector, we will priority choose a node from NodeSelector
+            // the current NodeSelector support consul service.
+            if ($nodeSelector instanceof NodeSelector && ($array = $nodeSelector->selectAliveNodes($service, $protocol))) {
+                $nodes = [];
+                foreach ($array as $item) {
+                    $nodes[] = new Node(...$item);
+                }
+                $balancer->setNodes($nodes);
+            } elseif ($balanceNodes = $this->getLoadBalancerNodes($service, $protocol)) {
                 $balancer->setNodes($balanceNodes);
             } else {
                 $balancer->setNodes([new Node($transporter->host, $transporter->port)]);
@@ -51,7 +61,9 @@ class ClientFactory
             return;
         }
 
-        if ($randomNodes = $this->getRandomNodes($service, $protocol)) {
+        if ($nodeSelector instanceof NodeSelector && ($node = $nodeSelector->selectRandomNode($service, $protocol))) {
+            [$transporter->host, $transporter->port] = $node;
+        } elseif ($randomNodes = $this->getRandomNodes($service, $protocol)) {
             [$transporter->host, $transporter->port] = $randomNodes;
         }
     }
@@ -67,7 +79,7 @@ class ClientFactory
         return $nodes;
     }
 
-    protected function getRandomNodes($service, $protocol)
+    protected function getRandomNodes($service, $protocol): array
     {
         $nodeData = SM::getService($service, $protocol)[SM::NODES] ?? [];
 
@@ -87,6 +99,7 @@ class ClientFactory
         $packer = $protocolMetadata[PM::PACKER] ?? null;
         $dataFormatter = $protocolMetadata[PM::DATA_FORMATTER] ?? null;
         $pathGenerator = $protocolMetadata[PM::PATH_GENERATOR] ?? null;
+        $nodeSelector = $protocolMetadata[PM::NODE_SELECTOR] ?? null;
 
         if (! $transporter instanceof TransporterInterface) {
             throw new ClientException(sprintf('The protocol of %s transporter is invalid.', $protocol));
@@ -104,6 +117,6 @@ class ClientFactory
             throw new ClientException(sprintf('The protocol of %s is path generator invalid.', $protocol));
         }
 
-        return [$transporter, $packer, $dataFormatter, $pathGenerator];
+        return [$transporter, $packer, $dataFormatter, $pathGenerator, $nodeSelector];
     }
 }
