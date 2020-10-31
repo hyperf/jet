@@ -25,7 +25,7 @@ install:
 before_script:
   - cd $TRAVIS_BUILD_DIR
   - composer config -g process-timeout 900 && composer update
-  - sleep 30
+  - sleep 60
   - php ./tests/register.php
 
 script:
