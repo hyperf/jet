@@ -75,15 +75,13 @@ use Hyperf\Jet\PathGenerator\PathGenerator;
 use Hyperf\Jet\ProtocolManager;
 use Hyperf\Jet\Transporter\ConsulTransporter;
 
-// $config 是 Consul 的配置，并且会合并到对应的 TCP 或者 HTTP Transporter 中，
-// 如果在 TCP 协议中传输，如果要设置超时，需要添加 ['timeout'=>1.0] 到你的 $config
- 
 
 ProtocolManager::register($protocol = 'consul', [
-    ProtocolManager::TRANSPORTER => new ConsulTransporter($host,$port,$config),
+    ProtocolManager::TRANSPORTER => new StreamSocketTransporter(),
     ProtocolManager::PACKER => new JsonEofPacker(),
     ProtocolManager::PATH_GENERATOR => new PathGenerator(),
     ProtocolManager::DATA_FORMATTER => new DataFormatter(),
+    ProtocolManager::NODE_SELECTOR => new NodeSelector($this->host, $this->port, $config), 
 ]);
 
 ```
@@ -142,6 +140,43 @@ class CalculatorService extends AbstractClient
         // 这里指定 transporter，您仍然可以通过 ProtocolManager 来获得 transporter 或从构造函数传递
         $transporter = new StreamSocketTransporter('127.0.0.1', 9503);
         // 这里指定 packer，您仍然可以通过 ProtocolManager 来获得 packer 或从构造函数传递
+        $packer = new JsonEofPacker();
+        parent::__construct($service, $transporter, $packer, $dataFormatter, $pathGenerator);
+    }
+}
+```
+
+如果使用 Consul 服务，可以按照下面的用法来进行注册
+```php
+<?php
+
+use Hyperf\Jet\AbstractClient;
+use Hyperf\Jet\Packer\JsonEofPacker;
+use Hyperf\Jet\Transporter\StreamSocketTransporter;
+use Hyperf\Rpc\Contract\DataFormatterInterface;
+use Hyperf\Rpc\Contract\PackerInterface;
+use Hyperf\Rpc\Contract\PathGeneratorInterface;
+use Hyperf\Rpc\Contract\TransporterInterface;
+use Hyperf\Jet\NodeSelector\NodeSelector;
+
+/**
+ * @method int add(int $a, int $b);
+ */
+class CalculatorService extends AbstractClient
+{
+    // Define `CalculatorService` as the default value of $service.
+    public function __construct(
+        string $service = 'CalculatorService',
+        TransporterInterface $transporter = null,
+        PackerInterface $packer = null,
+        ?DataFormatterInterface $dataFormatter = null,
+        ?PathGeneratorInterface $pathGenerator = null
+    ) {
+        // Specific the transporter here, you could also retrieve the transporter from ProtocolManager or passing by constructor.
+        $transporter = new StreamSocketTransporter();
+        $nodeSelector = new NodeSelector('127.0.0.1', 8500, $config);
+        [$transporter->host, $transporter->port] = $nodeSelector->selectRandomNode($service, 'jsonrpc');
+        // Specific the packer here, you could also retrieve the packer from ProtocolManager or passing by constructor.
         $packer = new JsonEofPacker();
         parent::__construct($service, $transporter, $packer, $dataFormatter, $pathGenerator);
     }
