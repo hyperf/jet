@@ -46,7 +46,7 @@ class ClientFactory
         if ($balancer = $transporter->getLoadBalancer()) {
             // If use node selector, we will priority choose a node from NodeSelector
             // the current NodeSelector support consul service.
-            if ($nodeSelector instanceof NodeSelector && ($array = $nodeSelector->selectAliveNodes())) {
+            if ($nodeSelector instanceof NodeSelector && ($array = $nodeSelector->selectAliveNodes($service, $protocol))) {
                 $nodes = [];
                 foreach ($array as $item) {
                     $nodes[] = new Node(...$item);
@@ -61,7 +61,7 @@ class ClientFactory
             return;
         }
 
-        if ($nodeSelector instanceof NodeSelector && ($node = $nodeSelector->selectRandomNode())) {
+        if ($nodeSelector instanceof NodeSelector && ($node = $nodeSelector->selectRandomNode($service, $protocol))) {
             [$transporter->host, $transporter->port] = $node;
         } elseif ($randomNodes = $this->getRandomNodes($service, $protocol)) {
             [$transporter->host, $transporter->port] = $randomNodes;

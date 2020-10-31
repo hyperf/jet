@@ -23,15 +23,15 @@ use Hyperf\Rpc\Contract\TransporterInterface;
 class ConsulCalculatorService extends AbstractClient
 {
     public function __construct(
-        string $service = 'ConsulCalculatorService',
+        string $service = 'CalculatorService',
         TransporterInterface $transporter = null,
         PackerInterface $packer = null,
         ?DataFormatterInterface $dataFormatter = null,
         ?PathGeneratorInterface $pathGenerator = null
     ) {
         $transporter = new GuzzleHttpTransporter();
-        $nodeSelector = new NodeSelector('127.0.0.1', 8500, $service);
-        [$transporter->host, $transporter->port] = $nodeSelector->selectRandomNode();
+        $nodeSelector = new NodeSelector('127.0.0.1', 8500);
+        [$transporter->host, $transporter->port] = $nodeSelector->selectRandomNode($service, 'jsonrpc-http');
         $packer = new JsonEofPacker();
         parent::__construct($service, $transporter, $packer, $dataFormatter, $pathGenerator);
     }

@@ -17,27 +17,30 @@ use Hyperf\Utils\Arr;
 
 class NodeSelector
 {
+    /**
+     * @var string
+     */
     public $host;
 
+    /**
+     * @var int
+     */
     public $port;
 
-    public $service;
-
-    public function __construct($host = '127.0.0.1', $port = 8500, $service = '')
+    public function __construct(string $host = '127.0.0.1', int $port = 8500)
     {
         $this->host = $host;
         $this->port = $port;
-        $this->service = $service;
     }
 
-    public function selectAliveNodes(): array
+    public function selectAliveNodes(string $service, string $protocol): array
     {
-        return $this->getAliveNodes();
+        return $this->getAliveNodes($service, $protocol);
     }
 
-    public function selectRandomNode(): array
+    public function selectRandomNode(string $service, string $protocol): array
     {
-        $nodes = $this->getAliveNodes();
+        $nodes = $this->getAliveNodes($service, $protocol);
         if (! $nodes) {
             return [];
         }
@@ -46,16 +49,17 @@ class NodeSelector
         return $nodes[$key];
     }
 
-    protected function getAliveNodes(): array
+    protected function getAliveNodes(string $service, string $protocol): array
     {
         $config = array_merge(['base_uri' => sprintf('http://%s:%d', $this->host, $this->port)]);
-        $consulHealth = (new Health(function () use ($config) { return new Client($config); }))->service($this->service)->json();
+        $consulHealth = (new Health(function () use ($config) { return new Client($config); }))->service($service)->json();
         $balanceNodes = [];
 
         // Get all alive node from consul health api.
         collect($consulHealth)
-            ->filter(function ($node) {
-                return Arr::get($node, 'Checks.1.Status') == 'passing';
+            ->filter(function ($node) use ($protocol) {
+                return Arr::get($node, 'Checks.1.Status') == 'passing'
+                    && Arr::get($node, 'Service.Meta.Protocol') == $protocol;
             })
             ->transform(function ($node) use (&$balanceNodes) {
                 $host = Arr::get($node, 'Service.Address');
