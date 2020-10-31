@@ -39,7 +39,8 @@ foreach ($protocols as $i => $protocol) {
         case 'jsonrpc-http':
             $requestBody['Check'] = [
                 'DeregisterCriticalServiceAfter' => '90m',
-                'HTTP' => "http://docker.for.mac.host.internal:{$ports[$i]}/",
+                // 'HTTP' => "http://docker.for.mac.host.internal:{$ports[$i]}/",
+                'HTTP' => "http://localhost:{$ports[$i]}/",
                 'Interval' => '1s',
             ];
             break;
@@ -48,6 +49,7 @@ foreach ($protocols as $i => $protocol) {
             $requestBody['Check'] = [
                 'DeregisterCriticalServiceAfter' => '90m',
                 'TCP' => "docker.for.mac.host.internal:{$ports[$i]}",
+                'TCP' => "localhost:{$ports[$i]}",
                 'Interval' => '1s',
             ];
             break;
