@@ -60,7 +60,7 @@ class ConsulIntegrationTest extends IntegrationTest
 
     protected function registerCalculatorServiceWithJsonrpcProtocol(): array
     {
-        $protocol = 'consul';
+        $protocol = 'jsonrpc-http';
         $service = 'ConsulCalculatorService';
         ProtocolManager::register($protocol, [
             ProtocolManager::TRANSPORTER => new GuzzleHttpTransporter(),

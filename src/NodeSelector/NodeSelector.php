@@ -30,14 +30,14 @@ class NodeSelector
         $this->service = $service;
     }
 
-    public function selectAliveNode(): array
+    public function selectAliveNodes(): array
     {
-        return $this->getAliveNode();
+        return $this->getAliveNodes();
     }
 
     public function selectRandomNode(): array
     {
-        $nodes = $this->getAliveNode();
+        $nodes = $this->getAliveNodes();
         if (! $nodes) {
             return [];
         }
@@ -46,7 +46,7 @@ class NodeSelector
         return $nodes[$key];
     }
 
-    protected function getAliveNode(): array
+    protected function getAliveNodes(): array
     {
         $config = array_merge(['base_uri' => sprintf('http://%s:%d', $this->host, $this->port)]);
         $consulHealth = (new Health(function () use ($config) { return new Client($config); }))->service($this->service)->json();
