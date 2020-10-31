@@ -1,16 +1,23 @@
 <?php
 
-use Hyperf\Consul\Agent;
-use Hyperf\Contract\ConfigInterface;
-use Hyperf\Guzzle\ClientFactory;
+declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 use GuzzleHttp\Client;
+use Hyperf\Consul\Agent;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $agent = new Agent(function () {
     return new Client([
         'base_uri' => 'http://127.0.0.1:8500',
-        'timeout' => 2
+        'timeout' => 2,
     ]);
 });
 
@@ -48,4 +55,3 @@ foreach ($protocols as $i => $protocol) {
 
     $agent->registerService($requestBody);
 }
-

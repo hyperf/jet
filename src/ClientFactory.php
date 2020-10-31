@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace Hyperf\Jet;
 
 use Hyperf\Jet\Exception\ClientException;
@@ -37,6 +36,7 @@ class ClientFactory
 
     /**
      * @param AbstractTransporter $transporter
+     * @param mixed $nodeSelector
      */
     protected function selectNodesForTransporter(TransporterInterface $transporter, $nodeSelector, string $service, string $protocol): void
     {
@@ -67,7 +67,7 @@ class ClientFactory
     protected function getLoadBalancerNodes($service, $protocol): array
     {
         $nodeData = SM::getService($service, $protocol)[SM::NODES] ?? [];
-        $nodes    = [];
+        $nodes = [];
         foreach ($nodeData ?? [] as [$host, $port]) {
             $nodes[] = new Node($host, $port);
         }
@@ -79,7 +79,7 @@ class ClientFactory
     {
         $nodeData = SM::getService($service, $protocol)[SM::NODES] ?? [];
 
-        if (!count($nodeData)) {
+        if (! count($nodeData)) {
             return $nodeData;
         }
 
@@ -91,25 +91,25 @@ class ClientFactory
     protected function protocolComponentGenerate($protocol): array
     {
         $protocolMetadata = PM::getProtocol($protocol);
-        $transporter      = $protocolMetadata[PM::TRANSPORTER] ?? null;
-        $packer           = $protocolMetadata[PM::PACKER] ?? null;
-        $dataFormatter    = $protocolMetadata[PM::DATA_FORMATTER] ?? null;
-        $pathGenerator    = $protocolMetadata[PM::PATH_GENERATOR] ?? null;
-        $nodeSelector     = $protocolMetadata[PM::NODE_SELECTOR] ?? null;
+        $transporter = $protocolMetadata[PM::TRANSPORTER] ?? null;
+        $packer = $protocolMetadata[PM::PACKER] ?? null;
+        $dataFormatter = $protocolMetadata[PM::DATA_FORMATTER] ?? null;
+        $pathGenerator = $protocolMetadata[PM::PATH_GENERATOR] ?? null;
+        $nodeSelector = $protocolMetadata[PM::NODE_SELECTOR] ?? null;
 
-        if (!$transporter instanceof TransporterInterface) {
+        if (! $transporter instanceof TransporterInterface) {
             throw new ClientException(sprintf('The protocol of %s transporter is invalid.', $protocol));
         }
 
-        if (!$packer instanceof PackerInterface) {
+        if (! $packer instanceof PackerInterface) {
             throw new ClientException(sprintf('The protocol of %s packer is invalid.', $protocol));
         }
 
-        if (!$dataFormatter instanceof DataFormatterInterface) {
+        if (! $dataFormatter instanceof DataFormatterInterface) {
             throw new ClientException(sprintf('The protocol of %s is data formatter invalid.', $protocol));
         }
 
-        if (!$pathGenerator instanceof PathGeneratorInterface) {
+        if (! $pathGenerator instanceof PathGeneratorInterface) {
             throw new ClientException(sprintf('The protocol of %s is path generator invalid.', $protocol));
         }
 

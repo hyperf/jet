@@ -9,7 +9,6 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-
 namespace HyperfTest\Jet;
 
 use Hyperf\Jet\DataFormatter\DataFormatter;
@@ -18,7 +17,6 @@ use Hyperf\Jet\NodeSelector\NodeSelector;
 use Hyperf\Jet\Packer\JsonEofPacker;
 use Hyperf\Jet\PathGenerator\PathGenerator;
 use Hyperf\Jet\ProtocolManager;
-use Hyperf\Jet\Transporter\ConsulTransporter;
 use Hyperf\Jet\Transporter\GuzzleHttpTransporter;
 use HyperfTest\Jet\Stub\ConsulCalculatorService;
 
@@ -63,13 +61,13 @@ class ConsulIntegrationTest extends IntegrationTest
     protected function registerCalculatorServiceWithJsonrpcProtocol(): array
     {
         $protocol = 'consul';
-        $service  = 'ConsulCalculatorService';
+        $service = 'ConsulCalculatorService';
         ProtocolManager::register($protocol, [
-            ProtocolManager::TRANSPORTER    => new GuzzleHttpTransporter(),
-            ProtocolManager::PACKER         => new JsonEofPacker(),
+            ProtocolManager::TRANSPORTER => new GuzzleHttpTransporter(),
+            ProtocolManager::PACKER => new JsonEofPacker(),
             ProtocolManager::PATH_GENERATOR => new PathGenerator(),
             ProtocolManager::DATA_FORMATTER => new DataFormatter(),
-            ProtocolManager::NODE_SELECTOR  => new NodeSelector($this->host, $this->port, $service),
+            ProtocolManager::NODE_SELECTOR => new NodeSelector($this->host, $this->port, $service),
         ]);
 
         return [$service, $protocol];
