@@ -57,14 +57,14 @@ use Hyperf\Jet\PathGenerator\PathGenerator;
 use Hyperf\Jet\ProtocolManager;
 use Hyperf\Jet\Transporter\ConsulTransporter;
 
-// $config is consul support features like ACL，TIMEOUT,
-// if transporter is tcp protocol,if you want timeout,you should add ['timeout'=>1.0] in you $config 
+// If you use consul service, you should register  ProtocolManager::NODE_SELECTOR.
 
 ProtocolManager::register($protocol = 'consul', [
-    ProtocolManager::TRANSPORTER => new ConsulTransporter($host,$port,$config),
+    ProtocolManager::TRANSPORTER => new StreamSocketTransporter(),
     ProtocolManager::PACKER => new JsonEofPacker(),
     ProtocolManager::PATH_GENERATOR => new PathGenerator(),
     ProtocolManager::DATA_FORMATTER => new DataFormatter(),
+    ProtocolManager::NODE_SELECTOR => new NodeSelector($this->host, $this->port, $config), 
 ]);
 
 ```
@@ -142,6 +142,42 @@ class CalculatorService extends AbstractClient
     ) {
         // Specific the transporter here, you could also retrieve the transporter from ProtocolManager or passing by constructor.
         $transporter = new StreamSocketTransporter('127.0.0.1', 9503);
+        // Specific the packer here, you could also retrieve the packer from ProtocolManager or passing by constructor.
+        $packer = new JsonEofPacker();
+        parent::__construct($service, $transporter, $packer, $dataFormatter, $pathGenerator);
+    }
+}
+```
+If use Consul service, you can use it in the following way.
+```php
+<?php
+
+use Hyperf\Jet\AbstractClient;
+use Hyperf\Jet\Packer\JsonEofPacker;
+use Hyperf\Jet\Transporter\StreamSocketTransporter;
+use Hyperf\Rpc\Contract\DataFormatterInterface;
+use Hyperf\Rpc\Contract\PackerInterface;
+use Hyperf\Rpc\Contract\PathGeneratorInterface;
+use Hyperf\Rpc\Contract\TransporterInterface;
+use Hyperf\Jet\NodeSelector\NodeSelector;
+
+/**
+ * @method int add(int $a, int $b);
+ */
+class CalculatorService extends AbstractClient
+{
+    // Define `CalculatorService` as the default value of $service.
+    public function __construct(
+        string $service = 'CalculatorService',
+        TransporterInterface $transporter = null,
+        PackerInterface $packer = null,
+        ?DataFormatterInterface $dataFormatter = null,
+        ?PathGeneratorInterface $pathGenerator = null
+    ) {
+        // Specific the transporter here, you could also retrieve the transporter from ProtocolManager or passing by constructor.
+        $transporter = new StreamSocketTransporter();
+        $nodeSelector = new NodeSelector('127.0.0.1', 8500, $config);
+        [$transporter->host, $transporter->port] = $nodeSelector->selectRandomNode($service, 'jsonrpc');
         // Specific the packer here, you could also retrieve the packer from ProtocolManager or passing by constructor.
         $packer = new JsonEofPacker();
         parent::__construct($service, $transporter, $packer, $dataFormatter, $pathGenerator);

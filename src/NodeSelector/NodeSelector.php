@@ -27,10 +27,16 @@ class NodeSelector
      */
     public $port;
 
-    public function __construct(string $host = '127.0.0.1', int $port = 8500)
+    /**
+     * @var array
+     */
+    public $config;
+
+    public function __construct(string $host = '127.0.0.1', int $port = 8500, array $config = [])
     {
         $this->host = $host;
         $this->port = $port;
+        $this->config = $config;
     }
 
     public function selectAliveNodes(string $service, string $protocol): array
@@ -51,7 +57,7 @@ class NodeSelector
 
     protected function getAliveNodes(string $service, string $protocol): array
     {
-        $config = array_merge(['base_uri' => sprintf('http://%s:%d', $this->host, $this->port)]);
+        $config = array_merge(['base_uri' => sprintf('http://%s:%d', $this->host, $this->port)], $this->config);
         $consulHealth = (new Health(function () use ($config) { return new Client($config); }))->service($service)->json();
         $balanceNodes = [];
 
