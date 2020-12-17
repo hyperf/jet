@@ -63,6 +63,18 @@ class StreamSocketTransporter extends AbstractTransporter
 
     public function recv()
     {
+        try {
+            $result = $this->recvive();
+        } catch (\Throwable $exception) {
+            $this->close();
+            throw $exception;
+        }
+
+        return $result;
+    }
+
+    public function recvive()
+    {
         $buf = '';
         $timeout = 1000;
 
@@ -142,5 +154,7 @@ class StreamSocketTransporter extends AbstractTransporter
             fclose($this->client);
             $this->client = null;
         }
+
+        $this->isConnected = false;
     }
 }
