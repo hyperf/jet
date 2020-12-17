@@ -13,6 +13,7 @@ namespace Hyperf\Jet\Transporter;
 
 use Hyperf\Jet\Exception\ClientException;
 use Hyperf\Jet\Exception\ConnectionException;
+use Hyperf\Jet\Exception\ExceptionThrower;
 use Hyperf\Jet\Exception\RecvFailedException;
 
 class StreamSocketTransporter extends AbstractTransporter
@@ -70,13 +71,17 @@ class StreamSocketTransporter extends AbstractTransporter
         // The maximum number of retries is 12, and 1000 microseconds is the minimum waiting time.
         // The waiting time is doubled each time until the server writes data to the buffer.
         // Usually, the data can be obtained within 1 microsecond.
-        return retry(12, function () use (&$buf, &$timeout) {
+        $result = retry(12, function () use (&$buf, &$timeout) {
             $read = [$this->client];
             $write = null;
             $except = null;
             while (stream_select($read, $write, $except, 0, $timeout)) {
                 foreach ($read as $r) {
-                    $buf .= fread($r, 8192);
+                    $res = fread($r, 8192);
+                    if ($res === false) {
+                        return new ExceptionThrower(new ConnectionException('Connection was closed.'));
+                    }
+                    $buf .= $res;
                 }
             }
 
@@ -88,6 +93,12 @@ class StreamSocketTransporter extends AbstractTransporter
 
             return $buf;
         });
+
+        if ($result instanceof ExceptionThrower) {
+            throw $result->getThrowable();
+        }
+
+        return $result;
     }
 
     protected function getTarget(): array
