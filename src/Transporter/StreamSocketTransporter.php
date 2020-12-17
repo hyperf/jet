@@ -78,7 +78,7 @@ class StreamSocketTransporter extends AbstractTransporter
             while (stream_select($read, $write, $except, 0, $timeout)) {
                 foreach ($read as $r) {
                     $res = fread($r, 8192);
-                    if ($res === false) {
+                    if (feof($r)) {
                         return new ExceptionThrower(new ConnectionException('Connection was closed.'));
                     }
                     $buf .= $res;

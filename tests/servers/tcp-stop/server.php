@@ -9,7 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
-$server = new Swoole\Server('127.0.0.1', 10001, SWOOLE_BASE);
+$server = new Swoole\Server('0.0.0.0', 10001, SWOOLE_BASE);
 
 $server->set([
     'worker_num' => 1,
@@ -22,6 +22,7 @@ $server->on('Connect', function ($server, $fd) {
 
 // 监听数据接收事件
 $server->on('Receive', function (Swoole\Server $server, $fd, $from_id, $data) {
+    var_dump($data);
     $server->send($fd, 'Server: ' . $data);
     $server->stop();
 });

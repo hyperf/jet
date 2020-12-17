@@ -27,7 +27,7 @@ class TransporterTest extends TestCase
         $this->expectExceptionMessage('Connection was closed.');
         $transporter = new StreamSocketTransporter('127.0.0.1', 10001);
         $transporter->send('xxx');
-        $transporter->recv();
+        $this->assertSame('Server: xxx', $transporter->recv());
         $transporter->send('xxx');
         $transporter->recv();
     }
