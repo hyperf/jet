@@ -4,7 +4,7 @@ English | [中文](./README-CN.md)
 
 <p align="center">
   <a href="https://github.com/hyperf/jet/releases"><img src="https://poser.pugx.org/hyperf/jet/v/stable" alt="Stable Version"></a>
-  <a href="https://travis-ci.org/hyperf/jet"><img src="https://travis-ci.org/hyperf/jet.svg?branch=master" alt="Build Status"></a>
+  <a href="https://github.com/hyperf/jet/actions"><img src="https://github.com/hyperf/jet/workflows/PHPUnit%20for%20Jet/badge.svg" alt="PHPUnit for Jet"></a>
   <a href="https://packagist.org/packages/hyperf/jet"><img src="https://poser.pugx.org/hyperf/jet/downloads" alt="Total Downloads"></a>
   <a href="https://packagist.org/packages/hyperf/jet"><img src="https://poser.pugx.org/hyperf/jet/d/monthly" alt="Monthly Downloads"></a>
   <a href="https://www.php.net"><img src="https://img.shields.io/badge/php-%3E=7.2-brightgreen.svg?maxAge=2592000" alt="Php Version"></a>
