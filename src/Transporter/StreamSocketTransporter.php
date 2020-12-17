@@ -64,7 +64,7 @@ class StreamSocketTransporter extends AbstractTransporter
     public function recv()
     {
         try {
-            $result = $this->recvive();
+            $result = $this->receive();
         } catch (\Throwable $exception) {
             $this->close();
             throw $exception;
@@ -73,7 +73,7 @@ class StreamSocketTransporter extends AbstractTransporter
         return $result;
     }
 
-    public function recvive()
+    public function receive()
     {
         $buf = '';
         $timeout = 1000;
