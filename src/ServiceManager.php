@@ -21,12 +21,12 @@ class ServiceManager
 
     public static function getService(string $service, string $protocol): array
     {
-        return static::$services[static::buildKey($service, $protocol)] ?? [];
+        return static::$services[self::buildKey($service, $protocol)] ?? [];
     }
 
     public static function isServiceRegistered(string $service, string $protocol): bool
     {
-        return isset(static::$services[static::buildKey($service, $protocol)]);
+        return isset(static::$services[self::buildKey($service, $protocol)]);
     }
 
     public static function register(string $service, string $protocol, array $metadata = [])
@@ -34,12 +34,12 @@ class ServiceManager
         if (! ProtocolManager::isProtocolRegistered($protocol)) {
             throw new ClientException(sprintf('The protocol %s does not register to %s yet.', ProtocolManager::class, $protocol));
         }
-        static::$services[static::buildKey($service, $protocol)] = $metadata;
+        static::$services[self::buildKey($service, $protocol)] = $metadata;
     }
 
     public static function deregister(string $service, string $protocol): void
     {
-        unset(static::$services[static::buildKey($service, $protocol)]);
+        unset(static::$services[self::buildKey($service, $protocol)]);
     }
 
     private static function buildKey(string $service, string $protocol): string

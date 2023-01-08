@@ -19,6 +19,7 @@ use Hyperf\Rpc\Contract\DataFormatterInterface;
 use Hyperf\Rpc\Contract\PackerInterface;
 use Hyperf\Rpc\Contract\PathGeneratorInterface;
 use Hyperf\Rpc\Contract\TransporterInterface;
+use Hyperf\Rpc\Request;
 
 abstract class AbstractClient
 {
@@ -51,7 +52,7 @@ abstract class AbstractClient
     public function __call($name, $arguments)
     {
         $path = $this->pathGenerator->generate($this->service, $name);
-        $data = $this->dataFormatter->formatRequest([$path, $arguments, uniqid()]);
+        $data = $this->dataFormatter->formatRequest(new Request($path, $arguments, uniqid()));
         $this->transporter->send($this->packer->pack($data));
         $ret = $this->transporter->recv();
         if (! is_string($ret)) {
