@@ -15,6 +15,7 @@ use Hyperf\Jet\Exception\ServerException;
 use Hyperf\Jet\Packer\JsonLengthPacker;
 use Hyperf\Rpc\Contract\TransporterInterface;
 use HyperfTest\Jet\Stub\IdGenerator;
+use Mockery;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -25,14 +26,14 @@ class ClientTest extends TestCase
 {
     protected function tearDown()
     {
-        \Mockery::close();
+        Mockery::close();
     }
 
     public function testSendAndRecv()
     {
         $packer = new JsonLengthPacker();
         $id = uniqid();
-        $transporter = \Mockery::mock(TransporterInterface::class);
+        $transporter = Mockery::mock(TransporterInterface::class);
         $transporter->shouldReceive('send')->withAnyArgs()->andReturnUsing(function ($string) use ($packer, $id) {
             $data = $packer->unpack($string);
             $this->assertSame([$id], $data['params']);
@@ -54,7 +55,7 @@ class ClientTest extends TestCase
     public function testException()
     {
         $packer = new JsonLengthPacker();
-        $transporter = \Mockery::mock(TransporterInterface::class);
+        $transporter = Mockery::mock(TransporterInterface::class);
         $transporter->shouldReceive('send')->withAnyArgs()->andReturnUsing(function ($string) use ($packer) {
             $data = $packer->unpack($string);
             $this->assertSame('/id_generate/exception', $data['method']);

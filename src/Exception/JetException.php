@@ -11,6 +11,8 @@ declare(strict_types=1);
  */
 namespace Hyperf\Jet\Exception;
 
-class JetException extends \RuntimeException
+use RuntimeException;
+
+class JetException extends RuntimeException
 {
 }

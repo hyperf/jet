@@ -12,10 +12,11 @@ declare(strict_types=1);
 namespace Hyperf\Jet\DataFormatter;
 
 use Hyperf\Rpc\Contract\DataFormatterInterface;
+use Throwable;
 
 class DataFormatter implements DataFormatterInterface
 {
-    public function formatRequest($data)
+    public function formatRequest($data): array
     {
         [$path, $params, $id] = $data;
         return [
@@ -27,7 +28,7 @@ class DataFormatter implements DataFormatterInterface
         ];
     }
 
-    public function formatResponse($data)
+    public function formatResponse($data): array
     {
         [$id, $result] = $data;
         return [
@@ -37,11 +38,11 @@ class DataFormatter implements DataFormatterInterface
         ];
     }
 
-    public function formatErrorResponse($data)
+    public function formatErrorResponse($data): array
     {
         [$id, $code, $message, $data] = $data;
 
-        if (isset($data) && $data instanceof \Throwable) {
+        if (isset($data) && $data instanceof Throwable) {
             $data = [
                 'class' => get_class($data),
                 'code' => $data->getCode(),

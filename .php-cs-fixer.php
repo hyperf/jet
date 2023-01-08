@@ -9,7 +9,7 @@ This file is part of Hyperf.
 @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
 EOF;
 
-return PhpCsFixer\Config::create()
+return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setRules([
         '@PSR2' => true,
@@ -17,7 +17,7 @@ return PhpCsFixer\Config::create()
         '@DoctrineAnnotation' => true,
         '@PhpCsFixer' => true,
         'header_comment' => [
-            'commentType' => 'PHPDoc',
+            'comment_type' => 'PHPDoc',
             'header' => $header,
             'separate' => 'none',
             'location' => 'after_declare_strict',
@@ -65,6 +65,11 @@ return PhpCsFixer\Config::create()
         'constant_case' => [
             'case' => 'lower',
         ],
+        'global_namespace_import' => [
+            'import_classes' => true,
+            'import_constants' => true,
+            'import_functions' => true,
+        ],
         'class_attributes_separation' => true,
         'combine_consecutive_unsets' => true,
         'declare_strict_types' => true,
@@ -83,6 +88,9 @@ return PhpCsFixer\Config::create()
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
+            ->exclude('bin')
+            ->exclude('public')
+            ->exclude('runtime')
             ->exclude('vendor')
             ->in(__DIR__)
     )

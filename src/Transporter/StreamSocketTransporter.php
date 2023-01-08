@@ -15,6 +15,7 @@ use Hyperf\Jet\Exception\ClientException;
 use Hyperf\Jet\Exception\ConnectionException;
 use Hyperf\Jet\Exception\ExceptionThrower;
 use Hyperf\Jet\Exception\RecvFailedException;
+use Throwable;
 
 class StreamSocketTransporter extends AbstractTransporter
 {
@@ -65,7 +66,7 @@ class StreamSocketTransporter extends AbstractTransporter
     {
         try {
             $result = $this->receive();
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $this->close();
             throw $exception;
         }
