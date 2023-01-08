@@ -15,15 +15,9 @@ use Hyperf\Rpc\Contract\PackerInterface;
 
 class JsonLengthPacker implements PackerInterface
 {
-    /**
-     * @var string
-     */
-    protected $type;
+    protected string $type;
 
-    /**
-     * @var int
-     */
-    protected $length;
+    protected int $length;
 
     /**
      * @var array

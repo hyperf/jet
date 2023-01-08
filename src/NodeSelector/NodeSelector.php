@@ -17,26 +17,8 @@ use Hyperf\Utils\Arr;
 
 class NodeSelector
 {
-    /**
-     * @var string
-     */
-    public $host;
-
-    /**
-     * @var int
-     */
-    public $port;
-
-    /**
-     * @var array
-     */
-    public $config;
-
-    public function __construct(string $host = '127.0.0.1', int $port = 8500, array $config = [])
+    public function __construct(public string $host = '127.0.0.1', public int $port = 8500, public array $config = [])
     {
-        $this->host = $host;
-        $this->port = $port;
-        $this->config = $config;
     }
 
     public function selectAliveNodes(string $service, string $protocol): array

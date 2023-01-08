@@ -25,32 +25,17 @@ abstract class AbstractClient
     /**
      * @var null|resource
      */
-    protected $client;
+    protected mixed $client = null;
 
-    /**
-     * @var string
-     */
-    protected $service;
+    protected string $service;
 
-    /**
-     * @var PackerInterface
-     */
-    protected $packer;
+    protected PackerInterface $packer;
 
-    /**
-     * @var DataFormatterInterface
-     */
-    protected $dataFormatter;
+    protected DataFormatterInterface $dataFormatter;
 
-    /**
-     * @var PathGeneratorInterface
-     */
-    protected $pathGenerator;
+    protected PathGeneratorInterface $pathGenerator;
 
-    /**
-     * @var TransporterInterface
-     */
-    protected $transporter;
+    protected TransporterInterface $transporter;
 
     public function __construct(string $service, TransporterInterface $transporter, PackerInterface $packer, ?DataFormatterInterface $dataFormatter = null, ?PathGeneratorInterface $pathGenerator = null)
     {

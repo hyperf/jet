@@ -20,35 +20,16 @@ use Throwable;
 class StreamSocketTransporter extends AbstractTransporter
 {
     /**
-     * @var string
-     */
-    public $host;
-
-    /**
-     * @var int
-     */
-    public $port;
-
-    /**
      * @var null|resource
      */
-    protected $client;
+    protected mixed $client = null;
 
-    /**
-     * @var float
-     */
-    protected $timeout;
+    protected bool $isConnected = false;
 
-    /**
-     * @var bool
-     */
-    protected $isConnected = false;
-
-    public function __construct(string $host = '', int $port = 9501, float $timeout = 1.0)
+    public function __construct(string $host = '', int $port = 9501, protected float $timeout = 1.0)
     {
         $this->host = $host;
         $this->port = $port;
-        $this->timeout = $timeout;
     }
 
     public function __destruct()

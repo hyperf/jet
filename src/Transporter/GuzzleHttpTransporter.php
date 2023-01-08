@@ -17,20 +17,11 @@ use GuzzleHttp\RequestOptions;
 
 class GuzzleHttpTransporter extends AbstractTransporter
 {
-    /**
-     * @var null|Client
-     */
-    protected $client;
+    protected ?Client $client = null;
 
-    /**
-     * @var array
-     */
-    protected $config;
+    protected array $config = [];
 
-    /**
-     * @var string
-     */
-    protected $result;
+    protected ?string $result = null;
 
     public function __construct(string $host = '', int $port = 9501, array $config = [])
     {
@@ -50,7 +41,7 @@ class GuzzleHttpTransporter extends AbstractTransporter
             RequestOptions::BODY => $data,
         ]);
 
-        $this->result = $response->getBody()->getContents();
+        $this->result = (string) $response->getBody();
     }
 
     public function recv()

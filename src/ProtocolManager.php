@@ -23,10 +23,7 @@ class ProtocolManager
 
     public const NODE_SELECTOR = 'ns';
 
-    /**
-     * @var array
-     */
-    protected static $protocols = [];
+    protected static array $protocols = [];
 
     public static function getProtocol(string $protocolName): array
     {

@@ -15,14 +15,8 @@ use Hyperf\Rpc\Contract\PackerInterface;
 
 class JsonEofPacker implements PackerInterface
 {
-    /**
-     * @var string
-     */
-    protected $eof;
-
-    public function __construct(string $eof = "\r\n")
+    public function __construct(protected string $eof = "\r\n")
     {
-        $this->eof = $eof;
     }
 
     public function pack($data): string

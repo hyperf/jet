@@ -12,50 +12,51 @@ declare(strict_types=1);
 namespace Hyperf\Jet\DataFormatter;
 
 use Hyperf\Rpc\Contract\DataFormatterInterface;
+use Hyperf\Rpc\ErrorResponse;
+use Hyperf\Rpc\Request;
+use Hyperf\Rpc\Response;
 use Throwable;
 
 class DataFormatter implements DataFormatterInterface
 {
-    public function formatRequest($data): array
+    public function formatRequest(Request $request): array
     {
-        [$path, $params, $id] = $data;
         return [
             'jsonrpc' => '2.0',
-            'method' => $path,
-            'params' => $params,
-            'id' => $id,
+            'method' => $request->getPath(),
+            'params' => $request->getParams(),
+            'id' => $request->getId(),
             'data' => [],
         ];
     }
 
-    public function formatResponse($data): array
+    public function formatResponse(Response $response): array
     {
-        [$id, $result] = $data;
         return [
             'jsonrpc' => '2.0',
-            'id' => $id,
-            'result' => $result,
+            'id' => $response->getId(),
+            'result' => $response->getResult(),
         ];
     }
 
-    public function formatErrorResponse($data): array
+    public function formatErrorResponse(ErrorResponse $response): array
     {
-        [$id, $code, $message, $data] = $data;
-
-        if (isset($data) && $data instanceof Throwable) {
-            $data = [
-                'class' => get_class($data),
-                'code' => $data->getCode(),
-                'message' => $data->getMessage(),
+        $exception = $response->getException();
+        if ($exception instanceof Throwable) {
+            $exception = [
+                'class' => get_class($exception),
+                'code' => $exception->getCode(),
+                'message' => $exception->getMessage(),
             ];
         }
+
         return [
             'jsonrpc' => '2.0',
-            'id' => $id ?? null,
+            'id' => $response->getId(),
             'error' => [
-                'code' => $code,
-                'message' => $message,
-                'data' => $data,
+                'code' => $response->getCode(),
+                'message' => $response->getMessage(),
+                'data' => $exception,
             ],
         ];
     }

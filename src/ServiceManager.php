@@ -17,10 +17,7 @@ class ServiceManager
 {
     public const NODES = 'nodes';
 
-    /**
-     * @var array
-     */
-    protected static $services = [];
+    protected static array $services = [];
 
     public static function getService(string $service, string $protocol): array
     {
