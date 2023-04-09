@@ -29,6 +29,7 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
         "guzzlehttp/guzzle": "^6.3|^7.0",
+        "hyperf/collection": "^3.0",
         "hyperf/consul": "^3.0",
         "hyperf/load-balancer": "^3.0",
         "hyperf/utils": "^3.0",
@@ -37,9 +38,10 @@
         "phpunit/phpunit": "^9.0"
     },
     "suggest": {
-        "hyperf/load-balancer": "Use load balancer for rpc client.",
+        "hyperf/load-balancer": "Use load balancer for rpc client.(^3.0)",
         "guzzlehttp/guzzle": "Required to use GuzzleHttpTransporter for rpc client.(^6.3|^7.0)",
-        "hyperf/consul": "Required if use Consul services"
+        "hyperf/consul": "Required if use Consul services.(^3.0)",
+        "hyperf/collection": "Required if use Collection and Arr for node selector.(^3.0)"
     },
     "config": {
         "sort-packages": true
