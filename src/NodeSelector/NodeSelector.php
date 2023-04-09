@@ -13,7 +13,9 @@ namespace Hyperf\Jet\NodeSelector;
 
 use GuzzleHttp\Client;
 use Hyperf\Consul\Health;
-use Hyperf\Utils\Arr;
+use Hyperf\Collection\Arr;
+
+use function Hyperf\Collection\collect;
 
 class NodeSelector
 {
