@@ -15,7 +15,10 @@
     "autoload": {
         "psr-4": {
             "Hyperf\\Jet\\": "src/"
-        }
+        },
+        "files": [
+            "src/Functions.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -32,7 +35,6 @@
         "hyperf/collection": "^3.0",
         "hyperf/consul": "^3.0",
         "hyperf/load-balancer": "^3.0",
-        "hyperf/utils": "^3.0",
         "mockery/mockery": "^1.0",
         "phpstan/phpstan": "^1.0",
         "phpunit/phpunit": "^9.0"

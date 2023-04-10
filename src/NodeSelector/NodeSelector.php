@@ -12,8 +12,8 @@ declare(strict_types=1);
 namespace Hyperf\Jet\NodeSelector;
 
 use GuzzleHttp\Client;
-use Hyperf\Consul\Health;
 use Hyperf\Collection\Arr;
+use Hyperf\Consul\Health;
 
 use function Hyperf\Collection\collect;
 
