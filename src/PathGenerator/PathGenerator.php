@@ -11,16 +11,15 @@ declare(strict_types=1);
  */
 namespace Hyperf\Jet\PathGenerator;
 
-use function Hyperf\Jet\str_replace_last;
-use function Hyperf\Jet\str_snake;
+use Hyperf\Stringable\Str;
 
 class PathGenerator implements \Hyperf\Rpc\Contract\PathGeneratorInterface
 {
     public function generate(string $service, string $method): string
     {
         $handledNamespace = explode('\\', $service);
-        $handledNamespace = str_replace_last('Service', '', end($handledNamespace));
-        $path = str_snake($handledNamespace);
+        $handledNamespace = Str::replaceLast('Service', '', end($handledNamespace));
+        $path = Str::snake($handledNamespace);
 
         if ($path[0] !== '/') {
             $path = '/' . $path;

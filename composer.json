@@ -35,6 +35,8 @@
         "hyperf/collection": "^3.0",
         "hyperf/consul": "^3.0",
         "hyperf/load-balancer": "^3.0",
+        "hyperf/stringable": "^3.0",
+        "hyperf/support": "^3.0",
         "mockery/mockery": "^1.0",
         "phpstan/phpstan": "^1.0",
         "phpunit/phpunit": "^9.0"

@@ -11,12 +11,14 @@ declare(strict_types=1);
  */
 namespace Hyperf\Jet;
 
+use Hyperf\Stringable\Str;
 use Throwable;
 
 /**
  * Retry.
  * @return mixed
  * @throws Throwable
+ * @deprecated since v0.6.0, use `Hyperf\Support\retry()` instead.
  */
 function retry(int $times, callable $callback, int $sleep = 0, callable $when = null)
 {
@@ -43,6 +45,7 @@ function retry(int $times, callable $callback, int $sleep = 0, callable $when = 
 
 /**
  * @return string
+ * @deprecated since v0.6.0, use `Hyperf\Stringable\Str::lower()` instead.
  */
 function str_lower(string $value)
 {
@@ -52,12 +55,13 @@ function str_lower(string $value)
 /**
  * @param string $delimiter
  * @return string
+ * @deprecated since v0.6.0, use `Hyperf\Stringable\Str::snake()` instead.
  */
 function str_snake(string $value, $delimiter = '_')
 {
     if (! ctype_lower($value)) {
         $value = preg_replace('/\s+/u', '', ucwords($value));
-        $value = str_lower(preg_replace('/(.)(?=[A-Z])/u', '$1' . $delimiter, $value));
+        $value = Str::lower(preg_replace('/(.)(?=[A-Z])/u', '$1' . $delimiter, $value));
     }
 
     return $value;
@@ -65,6 +69,7 @@ function str_snake(string $value, $delimiter = '_')
 
 /**
  * Replace the last occurrence of a given value in the string.
+ * @deprecated since v0.6.0, use `Hyperf\Stringable\Str::replaceLast()` instead.
  */
 function str_replace_last(string $search, string $replace, string $subject): string
 {
