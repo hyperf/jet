@@ -27,7 +27,8 @@
     },
     "require": {
         "php": ">=8.0",
-        "hyperf/rpc": "^3.0"
+        "hyperf/rpc": "^3.0",
+        "hyperf/stringable": "^3.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
@@ -43,7 +44,8 @@
         "hyperf/load-balancer": "Use load balancer for rpc client.(^3.0)",
         "guzzlehttp/guzzle": "Required to use GuzzleHttpTransporter for rpc client.(^6.3|^7.0)",
         "hyperf/consul": "Required if use Consul services.(^3.0)",
-        "hyperf/collection": "Required if use Collection and Arr for node selector.(^3.0)"
+        "hyperf/collection": "Required if use Collection and Arr for node selector.(^3.0)",
+        "hyperf/support": "Required if use retry function for stream socket transporter.(^3.0)"
     },
     "config": {
         "sort-packages": true

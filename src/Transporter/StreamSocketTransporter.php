@@ -17,7 +17,7 @@ use Hyperf\Jet\Exception\ExceptionThrower;
 use Hyperf\Jet\Exception\RecvFailedException;
 use Throwable;
 
-use function Hyperf\Jet\retry;
+use function Hyperf\Support\retry;
 
 class StreamSocketTransporter extends AbstractTransporter
 {
