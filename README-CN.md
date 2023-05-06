@@ -83,8 +83,8 @@ ProtocolManager::register($protocol = 'consul', [
     ProtocolManager::DATA_FORMATTER => new DataFormatter(),
     ProtocolManager::NODE_SELECTOR => new NodeSelector($this->host, $this->port, $config), 
 ]);
-
 ```
+
 ## 调用 RPC 方法
 
 ### 通过 ClientFactory 调用
@@ -147,6 +147,7 @@ class CalculatorService extends AbstractClient
 ```
 
 如果使用 Consul 服务，可以按照下面的用法来进行注册
+
 ```php
 <?php
 
@@ -190,33 +191,4 @@ class CalculatorService extends AbstractClient
 // $result 即为远程方法的返回值
 $client = new CalculatorService();
 $result = $client->add(1, 2);
-```
-
-
-## 注意事项
-
-1. Laravel 框架中使用
-
-在 `Laravel` 中使用时，会因为 `hyperf/utils` 自动加载优于 `laravel/framework`，导致 `Laravel` 无法正常使用。
-
-故我们可以降低 `hyperf/utils` 组件的加载优先级，然后重新执行 `composer dump-autoload -o` 即可解决这个问题，样例如下：
-
-安装组件：
-
-```
-composer require hyperf/composer-plugin
-```
-
-修改 `composer.json` 修改加载优先级：
-
-```json
-"extra": {
-    "hyperf": {
-        "plugin": {
-            "sort-autoload": {
-                "hyperf/utils": -1
-            }
-        }
-    }
-},
 ```
