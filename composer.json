@@ -15,10 +15,7 @@
     "autoload": {
         "psr-4": {
             "Hyperf\\Jet\\": "src/"
-        },
-        "files": [
-            "src/Functions.php"
-        ]
+        }
     },
     "autoload-dev": {
         "psr-4": {
