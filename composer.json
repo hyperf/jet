@@ -24,7 +24,7 @@
     },
     "require": {
         "php": ">=8.0",
-        "hyperf/rpc": "^3.0",
+        "hyperf/rpc": "^3.0.19",
         "hyperf/stringable": "^3.0"
     },
     "require-dev": {

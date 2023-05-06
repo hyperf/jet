@@ -13,7 +13,7 @@ English | [中文](./README-CN.md)
 
 # Jet, by Hyperf
 
-Jet is a unification model RPC Client, built-in JSONRPC protocol, available to running in ALL PHP environments, including PHP-FPM and Swoole/Hyperf environments. 
+Jet is a unification model RPC Client, built-in JSONRPC protocol, available to running in ALL PHP environments, including PHP-FPM and Swoole/Hyperf environments.
 
 > Also will built-in gRPC and Tars protocols in future.
 
@@ -47,7 +47,9 @@ ProtocolManager::register($protocol = 'jsonrpc', [
     ProtocolManager::DATA_FORMATTER => new DataFormatter(),
 ]);
 ```
+
 If you use consul, you could register a JSONRPC protocol like below:
+
 ```php
 <?php
 
@@ -148,7 +150,9 @@ class CalculatorService extends AbstractClient
     }
 }
 ```
+
 If use Consul service, you can use it in the following way.
+
 ```php
 <?php
 
