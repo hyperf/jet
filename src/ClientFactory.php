@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Jet;
 
 use Hyperf\Jet\Exception\ClientException;
@@ -30,8 +31,7 @@ class ClientFactory
 
         $this->selectNodesForTransporter($transporter, $nodeSelector, $service, $protocol);
 
-        return new class($service, $transporter, $packer, $dataFormatter, $pathGenerator) extends AbstractClient {
-        };
+        return new class($service, $transporter, $packer, $dataFormatter, $pathGenerator) extends AbstractClient {};
     }
 
     /**
