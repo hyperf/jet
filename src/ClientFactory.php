@@ -72,7 +72,7 @@ class ClientFactory
     {
         $nodeData = SM::getService($service, $protocol)[SM::NODES] ?? [];
         $nodes = [];
-        foreach ($nodeData ?? [] as [$host, $port]) {
+        foreach ($nodeData as [$host, $port]) {
             $nodes[] = new Node($host, $port);
         }
 

@@ -12,9 +12,10 @@ declare(strict_types=1);
 
 namespace Hyperf\Jet\PathGenerator;
 
+use Hyperf\Rpc\Contract\PathGeneratorInterface;
 use Hyperf\Stringable\Str;
 
-class PathGenerator implements \Hyperf\Rpc\Contract\PathGeneratorInterface
+class PathGenerator implements PathGeneratorInterface
 {
     public function generate(string $service, string $method): string
     {
